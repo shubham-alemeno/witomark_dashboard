@@ -10,7 +10,6 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -27,7 +26,6 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-  useSidebar,
 } from '@/components/ui/sidebar';
 import {
   ChevronRight,
@@ -37,155 +35,415 @@ import {
 } from 'lucide-react';
 import AppSidebar from '@/components/AppSidebar';
 import WorldMap from '@/components/WorldMap';
+import PaginatedDataTable from '@/components/PaginatedDatedTable';
+
+// const locationData = [
+//   {
+//     id: 1,
+//     lat: 37.7749,
+//     lng: -122.4194,
+//     status: 'genuine',
+//     location: 'San Francisco, CA',
+//     date: '2025-04-28',
+//   },
+//   {
+//     id: 2,
+//     lat: 40.7128,
+//     lng: -74.006,
+//     status: 'genuine',
+//     location: 'New York, NY',
+//     date: '2025-04-29',
+//   },
+//   {
+//     id: 3,
+//     lat: 34.0522,
+//     lng: -118.2437,
+//     status: 'genuine',
+//     location: 'Los Angeles, CA',
+//     date: '2025-04-27',
+//   },
+//   {
+//     id: 4,
+//     lat: 51.5074,
+//     lng: -0.1278,
+//     status: 'tampered',
+//     location: 'London, UK',
+//     date: '2025-04-30',
+//   },
+//   {
+//     id: 5,
+//     lat: 48.8566,
+//     lng: 2.3522,
+//     status: 'genuine',
+//     location: 'Paris, France',
+//     date: '2025-04-25',
+//   },
+//   {
+//     id: 6,
+//     lat: 35.6762,
+//     lng: 139.6503,
+//     status: 'genuine',
+//     location: 'Tokyo, Japan',
+//     date: '2025-04-26',
+//   },
+//   {
+//     id: 7,
+//     lat: 22.3193,
+//     lng: 114.1694,
+//     status: 'tampered',
+//     location: 'Hong Kong',
+//     date: '2025-04-29',
+//   },
+//   {
+//     id: 8,
+//     lat: 1.3521,
+//     lng: 103.8198,
+//     status: 'genuine',
+//     location: 'Singapore',
+//     date: '2025-04-28',
+//   },
+//   {
+//     id: 9,
+//     lat: -33.8688,
+//     lng: 151.2093,
+//     status: 'genuine',
+//     location: 'Sydney, Australia',
+//     date: '2025-04-30',
+//   },
+//   {
+//     id: 10,
+//     lat: 19.4326,
+//     lng: -99.1332,
+//     status: 'tampered',
+//     location: 'Mexico City, Mexico',
+//     date: '2025-04-27',
+//   },
+//   {
+//     id: 11,
+//     lat: 55.7558,
+//     lng: 37.6173,
+//     status: 'genuine',
+//     location: 'Moscow, Russia',
+//     date: '2025-04-26',
+//   },
+//   {
+//     id: 12,
+//     lat: 25.2048,
+//     lng: 55.2708,
+//     status: 'genuine',
+//     location: 'Dubai, UAE',
+//     date: '2025-04-25',
+//   },
+//   {
+//     id: 13,
+//     lat: -34.6037,
+//     lng: -58.3816,
+//     status: 'genuine',
+//     location: 'Buenos Aires, Argentina',
+//     date: '2025-04-29',
+//   },
+//   {
+//     id: 14,
+//     lat: 41.9028,
+//     lng: 12.4964,
+//     status: 'genuine',
+//     location: 'Rome, Italy',
+//     date: '2025-04-28',
+//   },
+//   {
+//     id: 15,
+//     lat: 28.6139,
+//     lng: 77.209,
+//     status: 'tampered',
+//     location: 'New Delhi, India',
+//     date: '2025-04-30',
+//   },
+//   {
+//     id: 16,
+//     lat: 39.9042,
+//     lng: 116.4074,
+//     status: 'genuine',
+//     location: 'Beijing, China',
+//     date: '2025-04-27',
+//   },
+//   {
+//     id: 17,
+//     lat: -23.5505,
+//     lng: -46.6333,
+//     status: 'genuine',
+//     location: 'São Paulo, Brazil',
+//     date: '2025-04-26',
+//   },
+//   {
+//     id: 18,
+//     lat: 52.52,
+//     lng: 13.405,
+//     status: 'tampered',
+//     location: 'Berlin, Germany',
+//     date: '2025-04-25',
+//   },
+// ];
+
+// Mock data
+console.log('hi');
+// const locationData = [
+//   {
+//     id: 1,
+//     lat: 28.6139,
+//     lng: 77.209,
+//     status: 'genuine',
+//     location: 'New Delhi, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 2,
+//     lat: 19.076,
+//     lng: 72.8777,
+//     status: 'genuine',
+//     location: 'Mumbai, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 3,
+//     lat: 13.0827,
+//     lng: 80.2707,
+//     status: 'genuine',
+//     location: 'Chennai, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 4,
+//     lat: 12.9716,
+//     lng: 77.5946,
+//     status: 'tampered',
+//     location: 'Bengaluru, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 5,
+//     lat: 22.5726,
+//     lng: 88.3639,
+//     status: 'genuine',
+//     location: 'Kolkata, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 6,
+//     lat: 17.385,
+//     lng: 78.4867,
+//     status: 'genuine',
+//     location: 'Hyderabad, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 7,
+//     lat: 26.9124,
+//     lng: 75.7873,
+//     status: 'tampered',
+//     location: 'Jaipur, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 8,
+//     lat: 23.0225,
+//     lng: 72.5714,
+//     status: 'genuine',
+//     location: 'Ahmedabad, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 9,
+//     lat: 21.1702,
+//     lng: 72.8311,
+//     status: 'genuine',
+//     location: 'Surat, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 10,
+//     lat: 18.5204,
+//     lng: 73.8567,
+//     status: 'genuine',
+//     location: 'Pune, India',
+//     date: '2025-05-01',
+//   },
+// ];
 
 const locationData = [
   {
     id: 1,
-    lat: 37.7749,
-    lng: -122.4194,
+    lat: 10.0,
+    lng: -10.0,
     status: 'genuine',
-    location: 'San Francisco, CA',
-    date: '2025-04-28',
+    location: 'Central America',
+    date: '2025-05-01',
   },
   {
     id: 2,
-    lat: 40.7128,
-    lng: -74.006,
-    status: 'genuine',
-    location: 'New York, NY',
-    date: '2025-04-29',
+    lat: 20.0,
+    lng: -10.0,
+    status: 'tampered',
+    location: 'Caribbean',
+    date: '2025-05-02',
   },
   {
     id: 3,
-    lat: 34.0522,
-    lng: -118.2437,
+    lat: 30.0,
+    lng: -40.0,
     status: 'genuine',
-    location: 'Los Angeles, CA',
-    date: '2025-04-27',
+    location: 'West Africa',
+    date: '2025-05-03',
   },
   {
     id: 4,
-    lat: 51.5074,
-    lng: -0.1278,
+    lat: 50.0,
+    lng: -20.0,
     status: 'tampered',
-    location: 'London, UK',
-    date: '2025-04-30',
-  },
-  {
-    id: 5,
-    lat: 48.8566,
-    lng: 2.3522,
-    status: 'genuine',
-    location: 'Paris, France',
-    date: '2025-04-25',
-  },
-  {
-    id: 6,
-    lat: 35.6762,
-    lng: 139.6503,
-    status: 'genuine',
-    location: 'Tokyo, Japan',
-    date: '2025-04-26',
-  },
-  {
-    id: 7,
-    lat: 22.3193,
-    lng: 114.1694,
-    status: 'tampered',
-    location: 'Hong Kong',
-    date: '2025-04-29',
-  },
-  {
-    id: 8,
-    lat: 1.3521,
-    lng: 103.8198,
-    status: 'genuine',
-    location: 'Singapore',
-    date: '2025-04-28',
-  },
-  {
-    id: 9,
-    lat: -33.8688,
-    lng: 151.2093,
-    status: 'genuine',
-    location: 'Sydney, Australia',
-    date: '2025-04-30',
-  },
-  {
-    id: 10,
-    lat: 19.4326,
-    lng: -99.1332,
-    status: 'tampered',
-    location: 'Mexico City, Mexico',
-    date: '2025-04-27',
-  },
-  {
-    id: 11,
-    lat: 55.7558,
-    lng: 37.6173,
-    status: 'genuine',
-    location: 'Moscow, Russia',
-    date: '2025-04-26',
-  },
-  {
-    id: 12,
-    lat: 25.2048,
-    lng: 55.2708,
-    status: 'genuine',
-    location: 'Dubai, UAE',
-    date: '2025-04-25',
-  },
-  {
-    id: 13,
-    lat: -34.6037,
-    lng: -58.3816,
-    status: 'genuine',
-    location: 'Buenos Aires, Argentina',
-    date: '2025-04-29',
-  },
-  {
-    id: 14,
-    lat: 41.9028,
-    lng: 12.4964,
-    status: 'genuine',
-    location: 'Rome, Italy',
-    date: '2025-04-28',
-  },
-  {
-    id: 15,
-    lat: 28.6139,
-    lng: 77.209,
-    status: 'tampered',
-    location: 'New Delhi, India',
-    date: '2025-04-30',
-  },
-  {
-    id: 16,
-    lat: 39.9042,
-    lng: 116.4074,
-    status: 'genuine',
-    location: 'Beijing, China',
-    date: '2025-04-27',
-  },
-  {
-    id: 17,
-    lat: -23.5505,
-    lng: -46.6333,
-    status: 'genuine',
-    location: 'São Paulo, Brazil',
-    date: '2025-04-26',
-  },
-  {
-    id: 18,
-    lat: 52.52,
-    lng: 13.405,
-    status: 'tampered',
-    location: 'Berlin, Germany',
-    date: '2025-04-25',
+    location: 'Western Europe',
+    date: '2025-05-04',
   },
 ];
 
-// Mock data
+// const locationData = [
+//   {
+//     id: 1,
+//     lat: 28.6139,
+//     lng: 77.209,
+//     status: 'genuine',
+//     location: 'New Delhi, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 2,
+//     lat: 19.076,
+//     lng: 72.8777,
+//     status: 'genuine',
+//     location: 'Mumbai, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 3,
+//     lat: 13.0827,
+//     lng: 80.2707,
+//     status: 'genuine',
+//     location: 'Chennai, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 4,
+//     lat: 12.9716,
+//     lng: 77.5946,
+//     status: 'tampered',
+//     location: 'Bengaluru, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 5,
+//     lat: 22.5726,
+//     lng: 88.3639,
+//     status: 'genuine',
+//     location: 'Kolkata, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 6,
+//     lat: 17.385,
+//     lng: 78.4867,
+//     status: 'genuine',
+//     location: 'Hyderabad, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 7,
+//     lat: 26.9124,
+//     lng: 75.7873,
+//     status: 'tampered',
+//     location: 'Jaipur, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 8,
+//     lat: 23.0225,
+//     lng: 72.5714,
+//     status: 'genuine',
+//     location: 'Ahmedabad, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 9,
+//     lat: 21.1702,
+//     lng: 72.8311,
+//     status: 'genuine',
+//     location: 'Surat, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 10,
+//     lat: 18.5204,
+//     lng: 73.8567,
+//     status: 'tampered',
+//     location: 'Pune, India',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 10,
+//     lat: 18.5204,
+//     lng: 73.8567,
+//     status: 'genuine',
+//     location: 'Pune, India',
+//     date: '2025-05-01',
+//   },
+
+//   {
+//     id: 1,
+//     lat: 43.65107,
+//     lng: -79.347015,
+//     status: 'genuine',
+//     location: 'Toronto, ON',
+//     date: '2025-05-01',
+//   },
+//   {
+//     id: 2,
+//     lat: 45.4215,
+//     lng: -75.6998,
+//     status: 'tampered',
+//     location: 'Ottawa, ON',
+//     date: '2025-05-02',
+//   },
+//   {
+//     id: 3,
+//     lat: 49.2827,
+//     lng: -123.1207,
+//     status: 'genuine',
+//     location: 'Vancouver, BC',
+//     date: '2025-05-03',
+//   },
+//   {
+//     id: 4,
+//     lat: 51.0447,
+//     lng: -114.0719,
+//     status: 'tampered',
+//     location: 'Calgary, AB',
+//     date: '2025-05-04',
+//   },
+//   {
+//     id: 5,
+//     lat: 46.8139,
+//     lng: -71.2082,
+//     status: 'genuine',
+//     location: 'Quebec City, QC',
+//     date: '2025-05-05',
+//   },
+//   {
+//     id: 6,
+//     lat: 53.5461,
+//     lng: -113.4938,
+//     status: 'genuine',
+//     location: 'Edmonton, AB',
+//     date: '2025-05-06',
+//   },
+// ];
+
 const scanData = {
   genuine: 14563,
   tampered: 5,
@@ -322,42 +580,43 @@ const Index = () => {
                 </div>
 
                 {viewType === 'list-view' ? (
-                  <Card>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">ID</TableHead>
-                          <TableHead>Location</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Date</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {locationData.map((item) => (
-                          <TableRow key={item.id}>
-                            <TableCell className="font-medium">
-                              #{item.id}
-                            </TableCell>
-                            <TableCell>{item.location}</TableCell>
-                            <TableCell>
-                              <span
-                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  item.status === 'genuine'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-red-100 text-red-800'
-                                }`}
-                              >
-                                {item.status}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {item.date}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </Card>
+                  // <Card>
+                  //   <Table>
+                  //     <TableHeader>
+                  //       <TableRow>
+                  //         <TableHead className="w-[100px]">ID</TableHead>
+                  //         <TableHead>Location</TableHead>
+                  //         <TableHead>Status</TableHead>
+                  //         <TableHead className="text-right">Date</TableHead>
+                  //       </TableRow>
+                  //     </TableHeader>
+                  //     <TableBody>
+                  //       {locationData.map((item) => (
+                  //         <TableRow key={item.id}>
+                  //           <TableCell className="font-medium">
+                  //             #{item.id}
+                  //           </TableCell>
+                  //           <TableCell>{item.location}</TableCell>
+                  //           <TableCell>
+                  //             <span
+                  //               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  //                 item.status === 'genuine'
+                  //                   ? 'bg-green-100 text-green-800'
+                  //                   : 'bg-red-100 text-red-800'
+                  //               }`}
+                  //             >
+                  //               {item.status}
+                  //             </span>
+                  //           </TableCell>
+                  //           <TableCell className="text-right">
+                  //             {item.date}
+                  //           </TableCell>
+                  //         </TableRow>
+                  //       ))}
+                  //     </TableBody>
+                  //   </Table>
+                  // </Card>
+                  <PaginatedDataTable data={locationData} itemsPerPage={7} />
                 ) : (
                   <div className="bg-gray-100 rounded-md shadow-sm">
                     <div className="h-96 relative" id="map-container">

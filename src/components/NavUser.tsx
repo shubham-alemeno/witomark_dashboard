@@ -23,6 +23,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { useNavigate } from 'react-router-dom';
 
 export function NavUser({
   user,
@@ -34,7 +35,12 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const navigate = useNavigate();
 
+  const handleLogout = () => {
+    localStorage.removeItem('sentinel_dash_token');
+    navigate('/login');
+  };
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -98,7 +104,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <LogOut />
-              Log out
+              <button onClick={handleLogout}>Log out</button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
