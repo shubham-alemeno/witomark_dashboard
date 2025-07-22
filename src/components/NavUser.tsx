@@ -1,3 +1,5 @@
+'use client';
+
 import {
   BadgeCheck,
   Bell,
@@ -6,6 +8,7 @@ import {
   LogOut,
   Sparkles,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -23,7 +26,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { useNavigate } from 'react-router-dom';
 
 export function NavUser({
   user,
@@ -35,11 +37,11 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleLogout = () => {
     localStorage.removeItem('sentinel_dash_token');
-    navigate('/login');
+    router.push('/login');
   };
   return (
     <SidebarMenu>
