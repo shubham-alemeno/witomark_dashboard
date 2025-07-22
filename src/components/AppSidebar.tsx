@@ -1,4 +1,12 @@
-import { BookOpen, Bot, Settings2, SquareTerminal } from 'lucide-react';
+import {
+  AlertCircle,
+  BookOpen,
+  Bot,
+  DollarSign,
+  Printer,
+  Settings2,
+  SquareTerminal,
+} from 'lucide-react';
 
 import {
   Sidebar,
@@ -25,7 +33,7 @@ const data = {
   },
   teams: [
     {
-      name: 'Acme Inc',
+      name: 'Witomark',
       logo: GalleryVerticalEnd,
       plan: 'Enterprise',
     },
@@ -42,20 +50,11 @@ const data = {
   ],
   navMain: [
     {
-      title: 'Scan Data',
-      url: '#scan-data',
+      title: 'Dashboard',
+      url: '#heatmap',
       icon: SquareTerminal,
       isActive: true,
-      items: [
-        {
-          title: 'Heatmap',
-          url: '#heatmap',
-        },
-        {
-          title: 'List view',
-          url: '#list-view',
-        },
-      ],
+      items: [],
     },
     {
       title: 'QR Generator',
@@ -64,29 +63,28 @@ const data = {
       items: [],
     },
     {
-      title: 'Printers',
-      url: '#printers',
+      title: 'Product Catalogue',
+      url: '#product-catalogue',
       icon: BookOpen,
       items: [],
     },
     {
-      title: 'Settings',
-      url: '#settings',
-      icon: Settings2,
-      items: [
-        {
-          title: 'General',
-          url: '#settings-general',
-        },
-        {
-          title: 'Team',
-          url: '#settings-team',
-        },
-        {
-          title: 'Billing',
-          url: '#settings-billing',
-        },
-      ],
+      title: 'Printers',
+      url: '#printers',
+      icon: Printer,
+      items: [],
+    },
+    {
+      title: 'Plan Details',
+      url: '#plan-details',
+      icon: DollarSign,
+      items: [],
+    },
+    {
+      title: 'Alerts',
+      url: '#alters',
+      icon: AlertCircle,
+      items: [],
     },
   ],
 };
