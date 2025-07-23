@@ -27,8 +27,8 @@ import { TeamSwitcher } from './team-switcher';
 // This is sample data
 const data = {
   user: {
-    name: 'shadcn',
-    email: 'm@example.com',
+    name: 'Deepak Gaikwad',
+    email: 'Alemeno',
     avatar: '/avatars/shadcn.jpg',
   },
   teams: [
@@ -82,7 +82,7 @@ const data = {
     },
     {
       title: 'Alerts',
-      url: '#alters',
+      url: '#alerts',
       icon: AlertCircle,
       items: [],
     },
