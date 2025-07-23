@@ -173,11 +173,7 @@ const ProductDetails = () => {
                                         alt="Product"
                                         className="w-full object-cover h-[170px]"
                                     />
-                                ) : (
-                                    <div className="w-full bg-gray-200 h-[170px] flex items-center justify-center text-gray-500 text-xs">
-                                        No Image Selected
-                                    </div>
-                                )}
+                                ) : null}
                             </div>
                             <div className="mt-4 px-4 flex items-center justify-center gap-2 text-sm text-gray-700">
                                 <img src="/witomark-qr.jpg" alt="QR Code" width={50} height={50} />

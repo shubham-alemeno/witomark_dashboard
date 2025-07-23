@@ -71,7 +71,7 @@ const Index = () => {
                         {activeTab === "qr-generator" && <QRCodeDetails />}
 
                         {/* Product Catalogue Tab */}
-                        {activeTab === "product-catalogue" && <ProductDetails />}
+                        {activeTab === "product-catalogue" && <ProductCatalogue />}
 
                         {/* Printers Tab */}
                         {activeTab === "printers" && <Printers />}
