@@ -11,6 +11,7 @@ import Printers from "./Printers";
 import PlanDetails from "./PlanDetails";
 import Alerts from "./Alerts";
 import QRCodeDetails from "./QRCodeDetails";
+import ProductDetails from "./ProductDetails";
 
 const Index = () => {
     const [activeTab, setActiveTab] = useState("dashboard");
@@ -70,7 +71,7 @@ const Index = () => {
                         {activeTab === "qr-generator" && <QRCodeDetails />}
 
                         {/* Product Catalogue Tab */}
-                        {activeTab === "product-catalogue" && <ProductCatalogue />}
+                        {activeTab === "product-catalogue" && <ProductDetails />}
 
                         {/* Printers Tab */}
                         {activeTab === "printers" && <Printers />}
