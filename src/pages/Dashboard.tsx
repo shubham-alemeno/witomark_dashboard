@@ -1,17 +1,22 @@
-import { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import WorldMap from '@/components/WorldMap';
 import PaginatedDataTable from '@/components/PaginatedDatedTable';
 import { locationData, statsCards } from '@/data/mockData';
 
 const Dashboard = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [viewType, setViewType] = useState('heatmap');
+
+  // Initialize view type from URL params
+  useEffect(() => {
+    const view = searchParams.get('view');
+    if (view === 'list' || view === 'map') {
+      setViewType(view === 'list' ? 'list-view' : 'heatmap');
+    }
+  }, [searchParams]);
 
   return (
     <div className="space-y-6">
@@ -49,7 +54,7 @@ const Dashboard = () => {
             size="sm"
             onClick={() => {
               setViewType('heatmap');
-              window.location.hash = 'heatmap';
+              setSearchParams({ view: 'map' });
             }}
           >
             Map View
@@ -59,7 +64,7 @@ const Dashboard = () => {
             size="sm"
             onClick={() => {
               setViewType('list-view');
-              window.location.hash = 'list-view';
+              setSearchParams({ view: 'list' });
             }}
           >
             List View

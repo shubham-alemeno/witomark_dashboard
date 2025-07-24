@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { ChevronRight, type LucideIcon } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
 import {
   Collapsible,
@@ -30,32 +30,14 @@ export function NavMain({
     }[];
   }[];
 }) {
-  // State to store the current hash
-  const [currentHash, setCurrentHash] = useState('');
-
-  // Effect to handle hash changes
-  useEffect(() => {
-    // Set initial hash
-    setCurrentHash(window.location.hash);
-
-    // Function to update hash on change
-    const handleHashChange = () => {
-      setCurrentHash(window.location.hash);
-    };
-
-    // Add event listener
-    window.addEventListener('hashchange', handleHashChange);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
-  }, []);
+  const location = useLocation();
 
   // Check if item is active
   const isItemActive = (url: string) => {
-    if (typeof window === 'undefined') return false;
-    return currentHash === url.replace('#', '');
+    return (
+      location.pathname === url ||
+      (url === '/dashboard' && location.pathname === '/')
+    );
   };
 
   return (
@@ -71,10 +53,10 @@ export function NavMain({
                   asChild
                   isActive={isItemActive(item.url)}
                 >
-                  <a href={item.url}>
+                  <Link to={item.url}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             );
@@ -107,9 +89,9 @@ export function NavMain({
                           asChild
                           isActive={isItemActive(subItem.url)}
                         >
-                          <a href={subItem.url}>
+                          <Link to={subItem.url}>
                             <span>{subItem.title}</span>
-                          </a>
+                          </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     ))}
