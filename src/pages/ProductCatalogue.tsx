@@ -1,30 +1,20 @@
-import React, { useState } from 'react';
-import { Search } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { qrData } from '@/data/mockQRData';
+import React, { useState } from "react";
+import { Search } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { qrData } from "@/data/mockQRData";
+import { useNavigate } from "react-router-dom";
 
 const ProductCatalogue = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [productName, setProductName] = useState('');
-  const [sortBy, setSortBy] = useState('latest');
-  const [status, setStatus] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [productName, setProductName] = useState("");
+  const [sortBy, setSortBy] = useState("latest");
+  const [status, setStatus] = useState("all");
+
+  const navigate = useNavigate();
 
   // Filter and sort data based on dropdowns and search
   const filteredAndSortedData = React.useMemo(() => {
@@ -40,26 +30,20 @@ const ProductCatalogue = () => {
     }
 
     // Filter by status
-    if (status !== 'all') {
+    if (status !== "all") {
       filtered = filtered.filter((item) => item.status === status);
     }
 
     // Sort data
     const sorted = [...filtered].sort((a, b) => {
       switch (sortBy) {
-        case 'latest':
-          return (
-            new Date(b.dateCreated).getTime() -
-            new Date(a.dateCreated).getTime()
-          );
-        case 'oldest':
-          return (
-            new Date(a.dateCreated).getTime() -
-            new Date(b.dateCreated).getTime()
-          );
-        case 'name-asc':
+        case "latest":
+          return new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime();
+        case "oldest":
+          return new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime();
+        case "name-asc":
           return a.linkedProduct.localeCompare(b.linkedProduct);
-        case 'name-desc':
+        case "name-desc":
           return b.linkedProduct.localeCompare(a.linkedProduct);
         default:
           return 0;
@@ -77,12 +61,10 @@ const ProductCatalogue = () => {
 
         <Card>
           <CardContent className="p-5">
-            <div className="text-sm text-gray-700 font-semibold text-muted-foreground">
-              Total products added
-            </div>
-            <div className="flex items-center">
-              <img src="/hexagon.png" className="w-6 h-6" />
-              <span className="text-2xl font-bold">{qrData.length}</span>
+            <div className="text-sm text-gray-700 font-semibold text-muted-foreground">Total products added</div>
+            <div className="flex items-center gap-1">
+              <img src="/hexagon.png" className="w-7 h-7" />
+              <span className="text-2xl font-bold pb-1">{qrData.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -93,9 +75,7 @@ const ProductCatalogue = () => {
           <CardContent className="p-5">
             <div className="flex">
               <div className="w-1/2">
-                <div className="text-sm text-gray-700 font-semibold text-muted-foreground mb-2">
-                  Enter Product Name
-                </div>
+                <div className="text-sm text-gray-700 font-semibold text-muted-foreground mb-2">Enter Product Name</div>
                 <div className="space-y-3">
                   <Input
                     type="text"
@@ -107,9 +87,7 @@ const ProductCatalogue = () => {
                 </div>
               </div>
               <div className="w-1/2 flex justify-end items-center">
-                <Button className="bg-[#969ee6] hover:bg-[#abb4ea] rounded-sm px-8 py-5">
-                  + Add Product
-                </Button>
+                <Button className="bg-[#969ee6] hover:bg-[#abb4ea] rounded-sm px-8 py-5">+ Add Product</Button>
               </div>
             </div>
           </CardContent>
@@ -148,12 +126,8 @@ const ProductCatalogue = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="latest">
-                      Sort by: Latest first
-                    </SelectItem>
-                    <SelectItem value="oldest">
-                      Sort by: Oldest first
-                    </SelectItem>
+                    <SelectItem value="latest">Sort by: Latest first</SelectItem>
+                    <SelectItem value="oldest">Sort by: Oldest first</SelectItem>
                     <SelectItem value="name-asc">Sort by: Name A-Z</SelectItem>
                     <SelectItem value="name-desc">Sort by: Name Z-A</SelectItem>
                   </SelectContent>
@@ -190,9 +164,7 @@ const ProductCatalogue = () => {
               {filteredAndSortedData.length > 0 ? (
                 filteredAndSortedData.map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium pl-5">
-                      {item.id}
-                    </TableCell>
+                    <TableCell className="font-medium pl-5">#{item.id}</TableCell>
                     <TableCell>{item.linkedProduct}</TableCell>
                     <TableCell>{item.linkedPrinter}</TableCell>
                     <TableCell>{item.dateCreated}</TableCell>
@@ -200,7 +172,7 @@ const ProductCatalogue = () => {
                       <Button
                         variant="link"
                         className="text-blue-700 hover:text-green-700 p-0 h-auto"
-                      >
+                        onClick={() => navigate(`/product-catalogue/${item.id}`)}>
                         View details
                       </Button>
                     </TableCell>
@@ -208,10 +180,7 @@ const ProductCatalogue = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-center py-8 text-muted-foreground"
-                  >
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                     No QR codes found matching your filters.
                   </TableCell>
                 </TableRow>
