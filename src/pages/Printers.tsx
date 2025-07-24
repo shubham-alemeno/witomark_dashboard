@@ -1,48 +1,79 @@
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { printers } from '@/data/mockData';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
+// Mock printer data matching the design
+const printerData = [
+  {
+    id: '#abct23',
+    name: 'Xerox Versa 1200',
+    dateAdded: 'June 21, 2025, 1:11 p.m.',
+    authModelNo: '28876',
+  },
+  {
+    id: '#xyzt23',
+    name: 'Indigo 1999',
+    dateAdded: 'June 21, 2025, 1:11 p.m.',
+    authModelNo: '56425',
+  },
+];
 
 const Printers = () => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Printers</h2>
-        <Button size="sm">Add Printer</Button>
+        <h1 className="text-2xl font-semibold text-gray-900">Printers</h1>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {printers.map((printer) => (
-          <Card key={printer.id}>
-            <CardHeader>
-              <CardTitle>{printer.name}</CardTitle>
-              <CardDescription>{printer.model}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Status:</span>
-                  <span className="font-medium text-green-500">Online</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">QRs Generated:</span>
-                  <span>1,250</span>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-end space-x-2">
-              <Button variant="outline" size="sm">
-                Details
-              </Button>
-              <Button size="sm">Configure</Button>
-            </CardFooter>
-          </Card>
-        ))}
+
+      {/* Printers Table */}
+      <div className="bg-white rounded-lg shadow-sm border">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b border-gray-200">
+              <TableHead className="text-left font-medium text-gray-600 py-4 px-6">
+                Printer ID
+              </TableHead>
+              <TableHead className="text-left font-medium text-gray-600 py-4 px-6">
+                Printer Name
+              </TableHead>
+              <TableHead className="text-left font-medium text-gray-600 py-4 px-6">
+                Date added
+              </TableHead>
+              <TableHead className="text-left font-medium text-gray-600 py-4 px-6">
+                Authentication model no
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {printerData.map((printer) => (
+              <TableRow
+                key={printer.id}
+                className="border-b border-gray-100 hover:bg-gray-50"
+              >
+                <TableCell className="py-4 px-6">
+                  <span className="text-gray-900 font-medium">
+                    {printer.id}
+                  </span>
+                </TableCell>
+                <TableCell className="py-4 px-6">
+                  <span className="text-gray-900">{printer.name}</span>
+                </TableCell>
+                <TableCell className="py-4 px-6">
+                  <span className="text-gray-600">{printer.dateAdded}</span>
+                </TableCell>
+                <TableCell className="py-4 px-6">
+                  <span className="text-gray-900">{printer.authModelNo}</span>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

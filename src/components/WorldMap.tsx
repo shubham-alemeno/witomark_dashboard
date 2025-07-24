@@ -126,9 +126,10 @@ interface LocationData {
 
 interface WorldMapProps {
   locationData: LocationData[];
+  onMarkerClick?: (locationData: LocationData) => void;
 }
 
-const WorldMap = ({ locationData }: WorldMapProps) => {
+const WorldMap = ({ locationData, onMarkerClick }: WorldMapProps) => {
   // Set up state to handle Leaflet in Next.js (which uses SSR)
   const [isMounted, setIsMounted] = useState(false);
 
@@ -243,6 +244,13 @@ const WorldMap = ({ locationData }: WorldMapProps) => {
               fillColor: point.status === 'genuine' ? '#22c55e' : '#ef4444',
               fillOpacity: 0.8,
             }}
+            eventHandlers={{
+              click: () => {
+                if (onMarkerClick) {
+                  onMarkerClick(point);
+                }
+              },
+            }}
           >
             <Popup>
               <div className="p-1">
@@ -266,7 +274,7 @@ const WorldMap = ({ locationData }: WorldMapProps) => {
         ))}
 
         {/* Legend */}
-        <div className="absolute bottom-2 left-2 z-500 bg-white p-2 rounded shadow-md">
+        {/* <div className="absolute bottom-2 left-2 z-500 bg-white p-2 rounded shadow-md">
           <div className="flex items-center mb-1">
             <div className="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
             <span className="text-xs">Genuine QR</span>
@@ -275,7 +283,7 @@ const WorldMap = ({ locationData }: WorldMapProps) => {
             <div className="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
             <span className="text-xs">Tampered QR</span>
           </div>
-        </div>
+        </div> */}
       </MapContainer>
     </div>
   );
