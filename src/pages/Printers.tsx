@@ -26,11 +26,6 @@ const printerData = [
 const Printers = () => {
   return (
     <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Printers</h1>
-      </div>
-
       {/* Printers Table */}
       <div className="bg-white rounded-lg shadow-sm border">
         <Table>
