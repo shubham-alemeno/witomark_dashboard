@@ -63,7 +63,7 @@ export interface CreateProductRequest {
   product_name: string;
 }
 
-export interface CreateProductResponse {
+export interface ProductResponse {
   id: number;
   company: number;
   company_name: string;
@@ -84,4 +84,11 @@ export interface CreateProductResponse {
   success_rate: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface UpdateProductRequest {
+  product_name?: string;
+  product_description?: string;
+  product_image?: File | null;
+  status?: string;
 }

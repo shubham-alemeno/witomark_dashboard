@@ -6,7 +6,8 @@ import {
   PrinterApiResponse,
   ProductApiResponse,
   ProductsFilter,
-  CreateProductResponse
+  ProductResponse,
+  UpdateProductRequest
 } from "./types";
 
 export const loginUser = async (data: LoginRequest): Promise<LoginResponse> => {
@@ -29,7 +30,21 @@ export const getAllProductsQuery = async (args?: ProductsFilter, page = 1, limit
   return response.data;
 };
 
-export const createProduct = async (data: CreateProductRequest): Promise<CreateProductResponse> => {
+export const createProduct = async (data: CreateProductRequest): Promise<ProductResponse> => {
   const response = await apiClient.post("/api/products/products/", data);
   return response.data;
+};
+
+export const getProduct = async (id: string): Promise<ProductResponse> => {
+  const response = await apiClient.get(`/api/products/products/${id}/`);
+  return response.data;
+};
+
+export const updateProduct = async (id: string, data: UpdateProductRequest) => {
+  const response = await apiClient.patch(`/api/products/products/${id}/`, data);
+  return response;
+};
+
+export const deleteProduct = async (id: string) => {
+  await apiClient.delete(`/api/products/products/${id}/`);
 };
