@@ -15,6 +15,7 @@ import PlanDetails from "./pages/PlanDetails";
 import Alerts from "./pages/Alerts";
 import QRCodeDetails from "./pages/QRCodeDetails";
 import ProductDetails from "./pages/ProductDetails";
+import BulkQRDownloader from "./pages/BulkQRDownloader";
 
 const App = () => (
   <TooltipProvider>
@@ -37,7 +38,7 @@ const App = () => (
           <Route path="product-catalogue" element={<ProductCatalogue />} />
           <Route path="product-catalogue/:productId" element={<ProductDetails />} />
           <Route path="printers" element={<Printers />} />
-          <Route path="plan-details" element={<PlanDetails />} />
+          <Route path="plan-details" element={<BulkQRDownloader />} />
           <Route path="alerts" element={<Alerts />} />
         </Route>
         <Route path="*" element={<NotFound />} />

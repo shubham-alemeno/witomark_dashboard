@@ -181,7 +181,7 @@ const ProductCatalogue = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    No QR codes found matching your filters.
+                    No products found matching your filters.
                   </TableCell>
                 </TableRow>
               )}
