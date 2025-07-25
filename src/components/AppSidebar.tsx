@@ -1,12 +1,4 @@
-import {
-  AlertCircle,
-  BookOpen,
-  Bot,
-  DollarSign,
-  Printer,
-  Settings2,
-  SquareTerminal,
-} from 'lucide-react';
+import { AlertCircle, BookOpen, Bot, DollarSign, Printer, Settings2, SquareTerminal } from "lucide-react";
 
 import {
   Sidebar,
@@ -17,79 +9,86 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
-} from '@/components/ui/sidebar';
-import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react';
-import { NavMain } from '@/components/NavMain';
-import { NavUser } from '@/components/NavUser';
-import { TeamSwitcher } from './team-switcher';
+  SidebarRail
+} from "@/components/ui/sidebar";
+import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
+import { NavMain } from "@/components/NavMain";
+import { NavUser } from "@/components/NavUser";
+import { TeamSwitcher } from "./team-switcher";
+import { useEffect, useState } from "react";
 
 // This is sample data
 const data = {
   user: {
-    name: 'Deepak Gaikwad',
-    email: 'Alemeno',
-    avatar: '/avatars/shadcn.jpg',
+    name: "Deepak Gaikwad",
+    email: "Alemeno",
+    avatar: ""
   },
   teams: [
     {
-      name: 'Witomark',
+      name: "Witomark",
       logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
+      plan: "Enterprise"
     },
     {
-      name: 'Acme Corp.',
+      name: "Acme Corp.",
       logo: AudioWaveform,
-      plan: 'Startup',
+      plan: "Startup"
     },
     {
-      name: 'Evil Corp.',
+      name: "Evil Corp.",
       logo: Command,
-      plan: 'Free',
-    },
+      plan: "Free"
+    }
   ],
   navMain: [
     {
-      title: 'Dashboard',
-      url: '/dashboard',
+      title: "Dashboard",
+      url: "/dashboard",
       icon: SquareTerminal,
       isActive: true,
-      items: [],
+      items: []
     },
     {
-      title: 'QR Generator',
-      url: '/qr-generator',
+      title: "QR Generator",
+      url: "/qr-generator",
       icon: Bot,
-      items: [],
+      items: []
     },
     {
-      title: 'Product Catalogue',
-      url: '/product-catalogue',
+      title: "Product Catalogue",
+      url: "/product-catalogue",
       icon: BookOpen,
-      items: [],
+      items: []
     },
     {
-      title: 'Printers',
-      url: '/printers',
+      title: "Printers",
+      url: "/printers",
       icon: Printer,
-      items: [],
+      items: []
     },
     {
-      title: 'Plan Details',
-      url: '/plan-details',
+      title: "Plan Details",
+      url: "/plan-details",
       icon: DollarSign,
-      items: [],
+      items: []
     },
     {
-      title: 'Alerts',
-      url: '/alerts',
+      title: "Alerts",
+      url: "/alerts",
       icon: AlertCircle,
-      items: [],
-    },
-  ],
+      items: []
+    }
+  ]
 };
 
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
+  const [user, setUser] = useState({});
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    setUser(JSON.parse(userData));
+  }, []);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -99,7 +98,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
