@@ -31,7 +31,7 @@ export const statsData: StatsData = {
 export const qrData: QRData[] = [
   {
     id: "11",
-    linkedProduct: "-",
+    linkedProduct: "Asphalt-E6 69K Capsule #324535",
     linkedPrinter: "Xerox Versa 1200",
     dateCreated: "June 21, 2025, 1:12 p.m.",
     status: "active"
@@ -69,7 +69,7 @@ export const qrData: QRData[] = [
     linkedProduct: "Retrograde-D3 69K Capsule #324535",
     linkedPrinter: "Xerox Versa 1200",
     dateCreated: "June 21, 2025, 1:17 p.m.",
-    status: "pending"
+    status: "active"
   },
   {
     id: "5",
