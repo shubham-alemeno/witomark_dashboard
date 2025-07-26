@@ -9,7 +9,10 @@ import {
   ProductApiResponse,
   ProductsFilter,
   ProductResponse,
-  UpdateProductRequest
+  UpdateProductRequest,
+  QRFilters,
+  BulkQRCreateRequest,
+  ListQRResponse
 } from "./types";
 
 // Dashboard API Methods
@@ -96,4 +99,22 @@ export const updateProduct = async (id: string, data: UpdateProductRequest) => {
 
 export const deleteProduct = async (id: string) => {
   await apiClient.delete(`/api/products/products/${id}/`);
+};
+
+export const createQR = async (data: BulkQRCreateRequest) => {
+  const response = await apiClient.post(`/api/fingerprints/qr_fingerprints/bulk_create/`, data);
+  return response;
+};
+
+export const listQR = async (page = 1, limit = 10): Promise<ListQRResponse> => {
+  const response = await apiClient.get(`/api/fingerprints/qr_fingerprints/?&all=true`);
+  return response.data;
+};
+
+export const listQRQuery = async (args?: QRFilters, page = 1, limit = 10): Promise<ListQRResponse> => {
+  const { search, sort, status } = args;
+  const response = await apiClient.get(
+    `/api/fingerprints/qr_fingerprints/?search=${search}&sort=${sort}&status=${status}`
+  );
+  return response.data;
 };

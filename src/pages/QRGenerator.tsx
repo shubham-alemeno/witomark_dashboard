@@ -1,58 +1,67 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { qrData } from "@/data/mockQRData";
+// import { qrData } from "@/data/mockQRData";
 import { useNavigate } from "react-router-dom";
+import { useAxios } from "@/hooks/useAxios";
+import { createQR, getAllPrinters, listQR, listQRQuery } from "@/lib/api/methods";
+import { Fingerprint } from "@/lib/api/types";
 
 const QRGenerator = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [qrCount, setQrCount] = useState("6");
+  const { data, isLoading: loadingQRs } = useAxios(listQR);
+  const { data: printers, isLoading: loadingPrinters } = useAxios(getAllPrinters);
+
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [qrCount, setQrCount] = useState<number>(0);
   const [selectedPrinter, setSelectedPrinter] = useState("");
-  const [sortBy, setSortBy] = useState("latest");
-  const [status, setStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+  const [status, setStatus] = useState("All");
+  const [qrData, setQrData] = useState<Fingerprint[]>([]);
+  const [totalQR, setTotalQR] = useState<string>("");
 
   const navigate = useNavigate();
 
-  // Filter and sort data based on dropdowns and search
-  const filteredAndSortedData = React.useMemo(() => {
-    let filtered = qrData;
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (item) =>
-          item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.linkedProduct.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  useEffect(() => {
+    if (!loadingQRs) {
+      setQrData(data.results);
     }
+  }, [data]);
 
-    // Filter by status
-    if (status !== "all") {
-      filtered = filtered.filter((item) => item.status === status);
+  const handleGenerateQR = async () => {
+    try {
+      const response = await createQR({ count: qrCount, printer: parseInt(selectedPrinter) });
+      alert(response.data.message ?? "Success");
+    } catch (error) {
+      alert(error);
     }
+  };
 
-    // Sort data
-    const sorted = [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case "latest":
-          return new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime();
-        case "oldest":
-          return new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime();
-        case "name-asc":
-          return a.linkedProduct.localeCompare(b.linkedProduct);
-        case "name-desc":
-          return b.linkedProduct.localeCompare(a.linkedProduct);
-        default:
-          return 0;
-      }
-    });
+  const handleFilters = async ({
+    status,
+    sort,
+    search
+  }: {
+    status?: string;
+    sort?: string;
+    search?: string;
+  } = {}) => {
+    try {
+      const response = await listQRQuery({
+        search: search ?? searchTerm,
+        sort: sort ?? sortBy,
+        status: status ?? (status === "All" ? "" : status)
+      });
+      setQrData(response.results);
+    } catch (error) {
+      alert(error);
+    }
+  };
 
-    return sorted;
-  }, [searchTerm, status, sortBy]);
+  if (loadingPrinters || loadingQRs) return <div>Loading...</div>;
 
   return (
     <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
@@ -114,7 +123,7 @@ const QRGenerator = () => {
                     <Input
                       type="number"
                       value={qrCount}
-                      onChange={(e) => setQrCount(e.target.value)}
+                      onChange={(e) => setQrCount(parseInt(e.target.value))}
                       placeholder="6"
                       className="flex-1 h-7"
                     />
@@ -123,16 +132,21 @@ const QRGenerator = () => {
                         <SelectValue placeholder="Select printer" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="xerox-1200">Xerox Versa 1200</SelectItem>
-                        <SelectItem value="canon-2645">Canon ImageRunner</SelectItem>
-                        <SelectItem value="hp-400">HP LaserJet Pro</SelectItem>
+                        {printers.results.length > 0 &&
+                          printers.results.map((printer) => (
+                            <SelectItem key={printer.id} value={printer.id.toString()}>
+                              {printer.printer_name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
               </div>
               <div className="w-1/2 flex justify-end items-center">
-                <Button className="bg-green-400 hover:bg-green-500 rounded-sm px-8 py-5">Generate QRs</Button>
+                <Button className="bg-green-400 hover:bg-green-500 rounded-sm px-8 py-5" onClick={handleGenerateQR}>
+                  Generate QRs
+                </Button>
               </div>
             </div>
           </CardContent>
@@ -145,6 +159,7 @@ const QRGenerator = () => {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-6">
               <CardTitle className="text-lg font-semibold ">Generated QRs</CardTitle>
+              {/* Search */}
               <div className="flex items-center relative">
                 <div className="w-[300px]">
                   <Input
@@ -156,36 +171,46 @@ const QRGenerator = () => {
                   />
                 </div>
                 <button className="absolute right-0 h-9 w-10 flex rounded-r-md justify-center items-center bg-gray-300">
-                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <Search className="h-4 w-4 text-muted-foreground" onClick={() => handleFilters()} />
                 </button>
               </div>
             </div>
 
             <div className="flex flex-row justify-end gap-4">
-              {/* Search */}
-
               {/* Sort and Status */}
               <div className="flex gap-2">
-                <Select value={sortBy} onValueChange={setSortBy}>
+                <Select
+                  value={sortBy}
+                  onValueChange={(val) => {
+                    setSortBy(val);
+                    handleFilters({ sort: val });
+                  }}>
                   <SelectTrigger className="w-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="latest">Sort by: Latest first</SelectItem>
+                    <SelectItem value="newest">Sort by: Latest first</SelectItem>
                     <SelectItem value="oldest">Sort by: Oldest first</SelectItem>
                     <SelectItem value="name-asc">Sort by: Name A-Z</SelectItem>
                     <SelectItem value="name-desc">Sort by: Name Z-A</SelectItem>
                   </SelectContent>
                 </Select>
 
-                <Select value={status} onValueChange={setStatus}>
+                <Select
+                  value={status}
+                  onValueChange={(val) => {
+                    setStatus(val);
+                    handleFilters({ status: val === "All" ? "" : val });
+                  }}>
                   <SelectTrigger className="w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Status: All</SelectItem>
-                    <SelectItem value="active">Status: Active</SelectItem>
-                    <SelectItem value="inactive">Status: Inactive</SelectItem>
+                    <SelectItem value="All">All</SelectItem>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Expired">Expired</SelectItem>
+                    <SelectItem value="Archived">Archived</SelectItem>
+                    <SelectItem value="Compromised">Compromised</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -206,13 +231,13 @@ const QRGenerator = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAndSortedData.length > 0 ? (
-                filteredAndSortedData.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium pl-5">#{item.id}</TableCell>
-                    <TableCell>{item.linkedProduct}</TableCell>
-                    <TableCell>{item.linkedPrinter}</TableCell>
-                    <TableCell>{item.dateCreated}</TableCell>
+              {qrData.length > 0 ? (
+                qrData.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium pl-5">#{item.serial_number}</TableCell>
+                    <TableCell>{item.product_name ?? "-"}</TableCell>
+                    <TableCell>{item.printer_name}</TableCell>
+                    <TableCell>{item.created_at}</TableCell>
                     <TableCell>
                       <Button
                         variant="link"
