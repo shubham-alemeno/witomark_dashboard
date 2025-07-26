@@ -19,10 +19,20 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 import { Search } from 'lucide-react';
 import WorldMap from '@/components/WorldMap';
 import ScanDetailsPanel from '@/components/ScanDetailsPanel';
-import { locationData } from '@/data/mockData';
+import { getMapStats, getMapScans } from '@/lib/api/methods';
+import { MapStatsResponse, MapScanData } from '@/lib/api/types';
 
 // Types
 interface ScanData {
@@ -126,6 +136,52 @@ const Dashboard = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [selectedScan, setSelectedScan] = useState<any>(null);
 
+  // API Data State
+  const [mapStats, setMapStats] = useState<MapStatsResponse | null>(null);
+  const [scanData, setScanData] = useState<MapScanData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 20;
+
+  // Helper function to get duration label
+  const getDurationLabel = () => {
+    const labelMap: { [key: string]: string } = {
+      '7days': 'last 7 days',
+      '30days': 'last 30 days',
+      '90days': 'last 90 days',
+    };
+    return labelMap[durationFilter] || 'last 30 days';
+  };
+
+  // Convert scan data to location data format for WorldMap
+  // Filter out invalid coordinates to prevent map errors
+  const locationDataForMap = scanData
+    .filter(
+      (scan) =>
+        scan.latitude &&
+        scan.longitude &&
+        !isNaN(scan.latitude) &&
+        !isNaN(scan.longitude) &&
+        scan.latitude !== 0 &&
+        scan.longitude !== 0
+    )
+    .map((scan, index) => ({
+      id: index + 1,
+      lat: scan.latitude,
+      lng: scan.longitude,
+      status:
+        scan.result.value === 1
+          ? 'genuine'
+          : ('tampered' as 'genuine' | 'tampered'),
+      location: scan.location,
+      date: new Date(scan.scan_time).toLocaleDateString(),
+    }));
+
   // Initialize view type from URL params
   useEffect(() => {
     const view = searchParams.get('view');
@@ -134,9 +190,66 @@ const Dashboard = () => {
     }
   }, [searchParams]);
 
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Convert duration filter to API format
+        const timeRangeMap: { [key: string]: string } = {
+          '7days': '7d',
+          '30days': '30d',
+          '90days': '90d',
+        };
+        const timeRange = timeRangeMap[durationFilter] || '30d';
+
+        // Fetch stats and scan data in parallel
+        const [statsResponse, scansResponse] = await Promise.all([
+          getMapStats(timeRange),
+          getMapScans(
+            timeRange,
+            statusFilter === 'all'
+              ? undefined
+              : statusFilter === 'genuine'
+              ? '1'
+              : '0',
+            searchTerm || undefined,
+            sortBy,
+            undefined, // status
+            undefined, // version
+            true, // hasLocation
+            currentPage, // page
+            pageSize // pageSize
+          ),
+        ]);
+
+        setMapStats(statsResponse);
+        setScanData(scansResponse.data);
+
+        // Update pagination info
+        setTotalCount(scansResponse.pagination.total);
+        setTotalPages(Math.ceil(scansResponse.pagination.total / pageSize));
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [durationFilter, statusFilter, searchTerm, sortBy, currentPage, pageSize]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [durationFilter, statusFilter, searchTerm, sortBy]);
+
   const handleSearch = () => {
-    // API call would go here
-    console.log('Searching with:', { searchTerm, sortBy, statusFilter });
+    // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   const handleViewChange = (view: string) => {
@@ -149,7 +262,7 @@ const Dashboard = () => {
     const scanDetails = {
       id: scan.id,
       result: scan.result,
-      scanId: 'HHDGhyl',
+      scanId: scan.id,
       scanDate: scan.scanTime,
       location: scan.location,
       coordinates: 'WXR3+9W, Lucknow, Uttar Pradesh 226021, India',
@@ -194,11 +307,15 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Total scans in</p>
-                  <p className="text-sm text-gray-600 mb-2">last 30 days</p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {getDurationLabel()}
+                  </p>
                   <div className="flex items-center">
                     <div className="w-3 h-3 bg-orange-500 rounded-full mr-2"></div>
                     <span className="text-3xl font-bold text-gray-900">
-                      1,98,345
+                      {loading
+                        ? '...'
+                        : mapStats?.total_scans?.toLocaleString() || '0'}
                     </span>
                   </div>
                 </div>
@@ -213,11 +330,15 @@ const Dashboard = () => {
                   <p className="text-sm text-gray-600 mb-1">
                     Total genuine scans in
                   </p>
-                  <p className="text-sm text-gray-600 mb-2">last 30 days</p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {getDurationLabel()}
+                  </p>
                   <div className="flex items-center">
                     <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
                     <span className="text-3xl font-bold text-gray-900">
-                      1,98,045
+                      {loading
+                        ? '...'
+                        : mapStats?.authentic_scans?.toLocaleString() || '0'}
                     </span>
                   </div>
                 </div>
@@ -232,11 +353,15 @@ const Dashboard = () => {
                   <p className="text-sm text-gray-600 mb-1">
                     Total tampered scans in
                   </p>
-                  <p className="text-sm text-gray-600 mb-2">last 30 days</p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {getDurationLabel()}
+                  </p>
                   <div className="flex items-center">
                     <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
                     <span className="text-3xl font-bold text-gray-900">
-                      300
+                      {loading
+                        ? '...'
+                        : mapStats?.forged_scans?.toLocaleString() || '0'}
                     </span>
                   </div>
                 </div>
@@ -257,7 +382,6 @@ const Dashboard = () => {
                 <SelectItem value="7days">Last 7 days</SelectItem>
                 <SelectItem value="30days">Last 30 days</SelectItem>
                 <SelectItem value="90days">Last 90 days</SelectItem>
-                <SelectItem value="1year">Last 1 year</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -286,7 +410,7 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="h-96 relative" id="map-container">
             <WorldMap
-              locationData={locationData}
+              locationData={locationDataForMap}
               onMarkerClick={handleMapMarkerClick}
             />
           </div>
@@ -317,8 +441,8 @@ const Dashboard = () => {
                 <SelectContent>
                   <SelectItem value="latest">Sort by: Latest first</SelectItem>
                   <SelectItem value="oldest">Sort by: Oldest first</SelectItem>
-                  <SelectItem value="name-asc">Sort by: Name A-Z</SelectItem>
-                  <SelectItem value="name-desc">Sort by: Name Z-A</SelectItem>
+                  {/* <SelectItem value="name-asc">Sort by: Name A-Z</SelectItem>
+                  <SelectItem value="name-desc">Sort by: Name Z-A</SelectItem> */}
                 </SelectContent>
               </Select>
 
@@ -366,42 +490,160 @@ const Dashboard = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockScanData.map((scan, index) => (
-                  <TableRow key={index} className="border-b hover:bg-gray-50">
-                    <TableCell>
-                      <div className="flex items-center">
-                        <div
-                          className={`w-3 h-3 rounded-full mr-2 ${
-                            scan.result === 'genuine'
-                              ? 'bg-green-500'
-                              : 'bg-red-500'
-                          }`}
-                        ></div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">{scan.id}</TableCell>
-                    <TableCell>{scan.productName}</TableCell>
-                    <TableCell className="text-gray-600">
-                      {scan.scanTime}
-                    </TableCell>
-                    <TableCell className="text-gray-600">
-                      {scan.location}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-blue-600 hover:text-blue-800"
-                        onClick={() => handleViewDetails(scan)}
-                      >
-                        View details
-                      </Button>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8">
+                      Loading scan data...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : error ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="text-center py-8 text-red-600"
+                    >
+                      {error}
+                    </TableCell>
+                  </TableRow>
+                ) : scanData?.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="text-center py-8 text-gray-500"
+                    >
+                      No scan data found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  scanData?.map((scan, index) => (
+                    <TableRow
+                      key={scan.scan_id || index}
+                      className="border-b hover:bg-gray-50"
+                    >
+                      <TableCell>
+                        <div className="flex items-center">
+                          <div
+                            className={`w-3 h-3 rounded-full mr-2 ${
+                              scan.result.value === 1
+                                ? 'bg-green-500'
+                                : 'bg-red-500'
+                            }`}
+                          ></div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {scan.scan_id}
+                      </TableCell>
+                      <TableCell>{scan.product_name}</TableCell>
+                      <TableCell className="text-gray-600">
+                        {new Date(scan.scan_time).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-gray-600">
+                        {scan.location}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-blue-600 hover:text-blue-800"
+                          onClick={() =>
+                            handleViewDetails({
+                              id: scan.scan_id,
+                              result:
+                                scan.result.value === 1
+                                  ? 'genuine'
+                                  : 'tampered',
+                              productName: scan.product_name,
+                              scanTime: new Date(
+                                scan.scan_time
+                              ).toLocaleString(),
+                              location: scan.location,
+                            })
+                          }
+                        >
+                          View details
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>
+
+          {/* Pagination */}
+          {!loading && !error && scanData.length > 0 && totalPages > 1 && (
+            <div className="px-6 py-4 border-t">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  Showing {(currentPage - 1) * pageSize + 1} to{' '}
+                  {Math.min(currentPage * pageSize, totalCount)} of {totalCount}{' '}
+                  results
+                </div>
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() =>
+                          setCurrentPage(Math.max(1, currentPage - 1))
+                        }
+                        className={
+                          currentPage === 1
+                            ? 'pointer-events-none opacity-50'
+                            : 'cursor-pointer'
+                        }
+                      />
+                    </PaginationItem>
+
+                    {/* Page Numbers */}
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNumber: number;
+                      if (totalPages <= 5) {
+                        pageNumber = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNumber = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNumber = totalPages - 4 + i;
+                      } else {
+                        pageNumber = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <PaginationItem key={pageNumber}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(pageNumber)}
+                            isActive={currentPage === pageNumber}
+                            className="cursor-pointer"
+                          >
+                            {pageNumber}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    })}
+
+                    {totalPages > 5 && currentPage < totalPages - 2 && (
+                      <PaginationItem>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() =>
+                          setCurrentPage(Math.min(totalPages, currentPage + 1))
+                        }
+                        className={
+                          currentPage === totalPages
+                            ? 'pointer-events-none opacity-50'
+                            : 'cursor-pointer'
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            </div>
+          )}
         </Card>
       )}
 

@@ -111,6 +111,7 @@ import {
   CircleMarker,
   Popup,
   ZoomControl,
+  useMap,
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import React from 'react';
@@ -129,60 +130,50 @@ interface WorldMapProps {
   onMarkerClick?: (locationData: LocationData) => void;
 }
 
+// Component to handle map bounds fitting
+const MapBoundsHandler = ({
+  locationData,
+}: {
+  locationData: LocationData[];
+}) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (locationData && locationData.length > 0) {
+      // Filter valid coordinates
+      const validPoints = locationData.filter(
+        (point) =>
+          point.lat &&
+          point.lng &&
+          !isNaN(point.lat) &&
+          !isNaN(point.lng) &&
+          point.lat !== 0 &&
+          point.lng !== 0
+      );
+
+      if (validPoints.length > 0) {
+        // If we have multiple distinct points, fit bounds
+        if (validPoints.length > 1) {
+          const bounds = validPoints.map(
+            (point) => [point.lat, point.lng] as [number, number]
+          );
+          map.fitBounds(bounds, { padding: [20, 20] });
+        } else {
+          // Single point, center and zoom
+          const point = validPoints[0];
+          map.setView([point.lat, point.lng], 12);
+        }
+      }
+    }
+  }, [map, locationData]);
+
+  return null;
+};
+
 const WorldMap = ({ locationData, onMarkerClick }: WorldMapProps) => {
   // Set up state to handle Leaflet in Next.js (which uses SSR)
   const [isMounted, setIsMounted] = useState(false);
-
-  // Calculate map settings based on point distribution
-  const getMapSettings = () => {
-    // Default for world view
-    const worldDefault = {
-      center: [20, 0],
-      zoom: 2,
-      useAutoBounds: false,
-    };
-
-    // If we have no data, return world view
-    if (!locationData || locationData.length === 0) {
-      return worldDefault;
-    }
-
-    // Calculate distribution of points
-    let minLat = 90,
-      maxLat = -90,
-      minLng = 180,
-      maxLng = -180;
-
-    locationData.forEach((point) => {
-      minLat = Math.min(minLat, point.lat);
-      maxLat = Math.max(maxLat, point.lat);
-      minLng = Math.min(minLng, point.lng);
-      maxLng = Math.max(maxLng, point.lng);
-    });
-
-    // Calculate span of coordinates
-    const latSpan = maxLat - minLat;
-    const lngSpan = maxLng - minLng;
-
-    // If points are globally distributed (cover more than 180 degrees longitude or 90 degrees latitude)
-    // or span across multiple continents, use world view
-    if (lngSpan > 180 || latSpan > 90 || lngSpan > 60) {
-      return worldDefault;
-    }
-
-    // Otherwise, focus on the region with some padding
-    const latPadding = latSpan * 0.2;
-    const lngPadding = lngSpan * 0.2;
-
-    return {
-      center: [(minLat + maxLat) / 2, (minLng + maxLng) / 2],
-      bounds: [
-        [minLat - latPadding, minLng - lngPadding],
-        [maxLat + latPadding, maxLng + lngPadding],
-      ],
-      useAutoBounds: true,
-    };
-  };
+  console.log(locationData);
 
   const sortedLocationData = [...locationData].sort((a, b) => {
     if (a.lat === b.lat && a.lng === b.lng) {
@@ -191,8 +182,6 @@ const WorldMap = ({ locationData, onMarkerClick }: WorldMapProps) => {
     }
     return 0;
   });
-
-  const mapSettings = getMapSettings();
 
   useEffect(() => {
     setIsMounted(true);
@@ -209,32 +198,22 @@ const WorldMap = ({ locationData, onMarkerClick }: WorldMapProps) => {
   return (
     <div className="relative w-full h-full z-0">
       <MapContainer
-        center={mapSettings.center}
-        zoom={mapSettings.zoom}
-        bounds={mapSettings.useAutoBounds ? mapSettings.bounds : undefined}
+        center={[20, 0]}
+        zoom={2}
         style={{ height: '100%', width: '100%', borderRadius: '0.375rem' }}
         scrollWheelZoom={true}
-        worldCopyJump={!mapSettings.useAutoBounds}
-        maxBounds={
-          mapSettings.useAutoBounds
-            ? [
-                [-90, -180],
-                [90, 180],
-              ]
-            : undefined
-        }
-        maxBoundsViscosity={mapSettings.useAutoBounds ? 1.0 : 0}
         zoomControl={false}
       >
+        <MapBoundsHandler locationData={locationData} />
         <ZoomControl position="bottomright" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          noWrap={mapSettings.useAutoBounds ? true : false}
+          noWrap={false}
         />
 
-        {sortedLocationData.map((point) => (
-          <CircleMarker
+        {sortedLocationData?.map((point) => (
+           <CircleMarker
             key={point.id}
             center={[point.lat, point.lng]}
             radius={5}

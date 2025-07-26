@@ -38,7 +38,7 @@ const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({
   scanDetails,
 }) => {
   if (!scanDetails) return null;
-
+  console.log(scanDetails);
   const isGenuine = scanDetails.result === 'genuine';
 
   return (
@@ -97,12 +97,12 @@ const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({
               <div>
                 <p className="text-sm font-medium text-gray-600">Location:</p>
                 <p className="text-sm text-green-600 font-medium">
-                  {scanDetails.coordinates || scanDetails.location}
+                  {scanDetails.location}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start space-x-3">
+            {/* <div className="flex items-start space-x-3">
               <Package className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-gray-600">
@@ -112,7 +112,7 @@ const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({
                   {scanDetails.qrSerialNo}
                 </p>
               </div>
-            </div>
+            </div> */}
 
             <div className="flex items-start space-x-3">
               <Package className="h-5 w-5 text-gray-400 mt-0.5" />
@@ -124,7 +124,7 @@ const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({
               </div>
             </div>
 
-            <div className="flex items-start space-x-3">
+            {/* <div className="flex items-start space-x-3">
               <Smartphone className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-gray-600">
@@ -134,7 +134,7 @@ const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({
                   {scanDetails.deviceDetails}
                 </p>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Map Section */}
