@@ -1,73 +1,60 @@
-import React, { useState } from 'react';
-import { Search } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { qrData } from '@/data/mockQRData';
+import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { qrData } from "@/data/mockQRData";
+import { useNavigate } from "react-router-dom";
+import { useAxios } from "@/hooks/useAxios";
+import { createProduct, getAllProducts, getAllProductsQuery } from "@/lib/api/methods";
+import { Product } from "@/lib/api/types";
 
 const ProductCatalogue = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [productName, setProductName] = useState('');
-  const [sortBy, setSortBy] = useState('latest');
-  const [status, setStatus] = useState('all');
+  const { data, isLoading, error } = useAxios(getAllProducts);
 
-  // Filter and sort data based on dropdowns and search
-  const filteredAndSortedData = React.useMemo(() => {
-    let filtered = qrData;
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [productName, setProductName] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("latest");
+  const [status, setStatus] = useState<string>("All");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (item) =>
-          item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.linkedProduct.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading) {
+      console.log("Data set");
+      setProducts(data.results);
     }
+  }, [data]);
 
-    // Filter by status
-    if (status !== 'all') {
-      filtered = filtered.filter((item) => item.status === status);
+  const handleCreateProduct = async () => {
+    try {
+      await createProduct({ product_name: productName });
+      alert("Product Created Successfully");
+    } catch (error) {
+      alert(error);
     }
+  };
 
-    // Sort data
-    const sorted = [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case 'latest':
-          return (
-            new Date(b.dateCreated).getTime() -
-            new Date(a.dateCreated).getTime()
-          );
-        case 'oldest':
-          return (
-            new Date(a.dateCreated).getTime() -
-            new Date(b.dateCreated).getTime()
-          );
-        case 'name-asc':
-          return a.linkedProduct.localeCompare(b.linkedProduct);
-        case 'name-desc':
-          return b.linkedProduct.localeCompare(a.linkedProduct);
-        default:
-          return 0;
-      }
-    });
+  const handleFilters = async (statusArg?: string, searchArg?: string) => {
+    try {
+      setLoading(true);
+      const response = await getAllProductsQuery({
+        status: statusArg ?? (status == "All" ? "" : status),
+        search: searchArg ?? searchTerm
+      });
+      setProducts(response.results);
+    } catch (error) {
+      alert(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return sorted;
-  }, [searchTerm, status, sortBy]);
+  if (loading || isLoading) return <div>Loading...</div>;
 
   return (
     <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
@@ -77,12 +64,10 @@ const ProductCatalogue = () => {
 
         <Card>
           <CardContent className="p-5">
-            <div className="text-sm text-gray-700 font-semibold text-muted-foreground">
-              Total products added
-            </div>
-            <div className="flex items-center">
-              <img src="/hexagon.png" className="w-6 h-6" />
-              <span className="text-2xl font-bold">{qrData.length}</span>
+            <div className="text-sm text-gray-700 font-semibold text-muted-foreground">Total products added</div>
+            <div className="flex items-center gap-1">
+              <img src="/hexagon.png" className="w-7 h-7" />
+              <span className="text-2xl font-bold pb-1">{qrData.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -93,9 +78,7 @@ const ProductCatalogue = () => {
           <CardContent className="p-5">
             <div className="flex">
               <div className="w-1/2">
-                <div className="text-sm text-gray-700 font-semibold text-muted-foreground mb-2">
-                  Enter Product Name
-                </div>
+                <div className="text-sm text-gray-700 font-semibold text-muted-foreground mb-2">Enter Product Name</div>
                 <div className="space-y-3">
                   <Input
                     type="text"
@@ -107,7 +90,7 @@ const ProductCatalogue = () => {
                 </div>
               </div>
               <div className="w-1/2 flex justify-end items-center">
-                <Button className="bg-[#969ee6] hover:bg-[#abb4ea] rounded-sm px-8 py-5">
+                <Button className="bg-[#969ee6] hover:bg-[#abb4ea] rounded-sm px-8 py-5" onClick={handleCreateProduct}>
                   + Add Product
                 </Button>
               </div>
@@ -132,7 +115,9 @@ const ProductCatalogue = () => {
                     className="w-full pr-10 h-7"
                   />
                 </div>
-                <button className="absolute right-0 h-7 w-10 flex rounded-r-md justify-center items-center bg-gray-300">
+                <button
+                  className="absolute right-0 h-7 w-10 flex rounded-r-md justify-center items-center bg-gray-300"
+                  onClick={() => handleFilters()}>
                   <Search className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
@@ -148,25 +133,26 @@ const ProductCatalogue = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="latest">
-                      Sort by: Latest first
-                    </SelectItem>
-                    <SelectItem value="oldest">
-                      Sort by: Oldest first
-                    </SelectItem>
+                    <SelectItem value="latest">Sort by: Latest first</SelectItem>
+                    <SelectItem value="oldest">Sort by: Oldest first</SelectItem>
                     <SelectItem value="name-asc">Sort by: Name A-Z</SelectItem>
                     <SelectItem value="name-desc">Sort by: Name Z-A</SelectItem>
                   </SelectContent>
                 </Select>
 
-                <Select value={status} onValueChange={setStatus}>
+                <Select
+                  value={status}
+                  onValueChange={(val) => {
+                    setStatus(val);
+                    handleFilters(val === "All" ? "" : val);
+                  }}>
                   <SelectTrigger className="w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Status: All</SelectItem>
-                    <SelectItem value="active">Status: Active</SelectItem>
-                    <SelectItem value="inactive">Status: Inactive</SelectItem>
+                    <SelectItem value="All">Status: All</SelectItem>
+                    <SelectItem value="Active">Status: Active</SelectItem>
+                    <SelectItem value="Inactive">Status: Inactive</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -187,20 +173,18 @@ const ProductCatalogue = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAndSortedData.length > 0 ? (
-                filteredAndSortedData.map((item, index) => (
+              {products.length > 0 ? (
+                products.map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium pl-5">
-                      {item.id}
-                    </TableCell>
-                    <TableCell>{item.linkedProduct}</TableCell>
-                    <TableCell>{item.linkedPrinter}</TableCell>
-                    <TableCell>{item.dateCreated}</TableCell>
+                    <TableCell className="font-medium pl-5">#{item.id}</TableCell>
+                    <TableCell>{item.product_name}</TableCell>
+                    <TableCell>{item.qr_fingerprints_count}</TableCell>
+                    <TableCell>{item.created_at}</TableCell>
                     <TableCell>
                       <Button
                         variant="link"
                         className="text-blue-700 hover:text-green-700 p-0 h-auto"
-                      >
+                        onClick={() => navigate(`/product-catalogue/${item.id}`)}>
                         View details
                       </Button>
                     </TableCell>
@@ -208,11 +192,8 @@ const ProductCatalogue = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-center py-8 text-muted-foreground"
-                  >
-                    No QR codes found matching your filters.
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    No products found matching your filters.
                   </TableCell>
                 </TableRow>
               )}
