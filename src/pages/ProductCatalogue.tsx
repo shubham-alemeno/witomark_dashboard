@@ -67,7 +67,7 @@ const ProductCatalogue = () => {
             <div className="text-sm text-gray-700 font-semibold text-muted-foreground">Total products added</div>
             <div className="flex items-center gap-1">
               <img src="/hexagon.png" className="w-7 h-7" />
-              <span className="text-2xl font-bold pb-1">{qrData.length}</span>
+              <span className="text-2xl font-bold pb-1">{data.total_count}</span>
             </div>
           </CardContent>
         </Card>
