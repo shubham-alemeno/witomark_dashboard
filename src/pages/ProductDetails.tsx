@@ -8,6 +8,7 @@ import { deleteProduct, getProduct, updateProduct } from "@/lib/api/methods";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { Fingerprint } from "@/lib/api/types";
 
 const ProductDetails = () => {
   const params = useParams();
@@ -16,6 +17,7 @@ const ProductDetails = () => {
   const [productDescription, setProductDescription] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [linkedQRs, setLinkedQRs] = useState<Fingerprint[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [status, setStatus] = useState<string>("");
 
@@ -25,10 +27,12 @@ const ProductDetails = () => {
     (async () => {
       setLoading(true);
       const response = await getProduct(params.productId);
+      console.log(response);
       setProductName(response.product_name);
       setProductDescription(response.product_description);
       setImagePreview(response.product_image_url);
       setStatus(response.status);
+
       setLoading(false);
     })();
   }, []);

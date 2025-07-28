@@ -95,6 +95,7 @@ export interface Product {
 }
 
 export interface ProductApiResponse {
+  total_count: number;
   count: number;
   next: string | null;
   previous: string | null;

@@ -39,7 +39,7 @@ const App = () => (
           <Route path="product-catalogue" element={<ProductCatalogue />} />
           <Route path="product-catalogue/:productId" element={<ProductDetails />} />
           <Route path="printers" element={<Printers />} />
-          <Route path="plan-details" element={<BulkQREditor />} />
+          <Route path="plan-details" element={<BulkQRDownloader />} />
           <Route path="alerts" element={<Alerts />} />
         </Route>
         <Route path="*" element={<NotFound />} />

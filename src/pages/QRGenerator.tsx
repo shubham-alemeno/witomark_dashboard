@@ -21,13 +21,15 @@ const QRGenerator = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [status, setStatus] = useState("All");
   const [qrData, setQrData] = useState<Fingerprint[]>([]);
-  const [totalQR, setTotalQR] = useState<string>("");
+  const [totalQR, setTotalQR] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loadingQRs) {
       setQrData(data.results);
+      setTotalQR(data.total_count);
     }
   }, [data]);
 
@@ -41,27 +43,30 @@ const QRGenerator = () => {
   };
 
   const handleFilters = async ({
-    status,
+    statusArg,
     sort,
     search
   }: {
-    status?: string;
+    statusArg?: string;
     sort?: string;
     search?: string;
   } = {}) => {
     try {
+      setLoading(true);
       const response = await listQRQuery({
         search: search ?? searchTerm,
         sort: sort ?? sortBy,
-        status: status ?? (status === "All" ? "" : status)
+        status: statusArg ?? (status === "All" ? "" : status)
       });
       setQrData(response.results);
     } catch (error) {
       alert(error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loadingPrinters || loadingQRs) return <div>Loading...</div>;
+  if (loadingPrinters || loadingQRs || loading) return <div>Loading...</div>;
 
   return (
     <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
@@ -76,7 +81,7 @@ const QRGenerator = () => {
             </div>
             <div className="flex items-center gap-1">
               <img src="/qricon.png" className="w-7 h-7" />
-              <span className="text-2xl font-bold pb-1">11</span>
+              <span className="text-2xl font-bold pb-1">{totalQR}</span>
             </div>
           </CardContent>
         </Card>
@@ -191,8 +196,8 @@ const QRGenerator = () => {
                   <SelectContent>
                     <SelectItem value="newest">Sort by: Latest first</SelectItem>
                     <SelectItem value="oldest">Sort by: Oldest first</SelectItem>
-                    <SelectItem value="name-asc">Sort by: Name A-Z</SelectItem>
-                    <SelectItem value="name-desc">Sort by: Name Z-A</SelectItem>
+                    <SelectItem value="a-z">Sort by: Name A-Z</SelectItem>
+                    <SelectItem value="z-a">Sort by: Name Z-A</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -200,7 +205,7 @@ const QRGenerator = () => {
                   value={status}
                   onValueChange={(val) => {
                     setStatus(val);
-                    handleFilters({ status: val === "All" ? "" : val });
+                    handleFilters({ statusArg: val === "All" ? "" : val });
                   }}>
                   <SelectTrigger className="w-32">
                     <SelectValue />
