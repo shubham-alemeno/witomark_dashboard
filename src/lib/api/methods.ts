@@ -19,9 +19,19 @@ import {
 } from "./types";
 
 // Dashboard API Methods
-export const getMapStats = async (timeRange: string = "30d", companyId?: string): Promise<MapStatsResponse> => {
+export const getMapStats = async (
+  timeRange: string = "30d",
+  companyId?: string,
+  startDate?: string,
+  endDate?: string
+): Promise<MapStatsResponse> => {
   const params = new URLSearchParams();
-  params.append("time_range", timeRange);
+
+  if (timeRange) {
+    params.append("time_range", timeRange);
+  }
+  if (startDate) params.append("start_date", startDate);
+  if (endDate) params.append("end_date", endDate);
   if (companyId) {
     params.append("company_id", companyId);
   }
@@ -46,7 +56,7 @@ export const getMapScans = async (
 ): Promise<MapScansResponse> => {
   const params = new URLSearchParams();
 
-  if (timeRange !== "custom") {
+  if (timeRange) {
     params.append("time_range", timeRange);
   }
   if (startDate) params.append("start_date", startDate);

@@ -1,26 +1,16 @@
-import React from 'react';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import {
-  CheckCircle,
-  XCircle,
-  MapPin,
-  Calendar,
-  Smartphone,
-  Package,
-} from 'lucide-react';
+import React from "react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { CheckCircle, XCircle, MapPin, Calendar, Smartphone, Package } from "lucide-react";
 
 interface ScanDetails {
   id: string;
-  result: 'genuine' | 'tampered';
+  result: "genuine" | "tampered";
   scanId: string;
   scanDate: string;
   location: string;
   coordinates?: string;
+  latitude?: number;
+  longitude?: number;
   qrSerialNo: string;
   product: string;
   deviceDetails: string;
@@ -32,43 +22,39 @@ interface ScanDetailsPanelProps {
   scanDetails: ScanDetails | null;
 }
 
-const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({
-  isOpen,
-  onClose,
-  scanDetails,
-}) => {
+const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({ isOpen, onClose, scanDetails }) => {
   if (!scanDetails) return null;
   console.log(scanDetails);
-  const isGenuine = scanDetails.result === 'genuine';
+  const isGenuine = scanDetails.result === "genuine";
+
+  // Helper function to open Google Maps
+  const openGoogleMaps = () => {
+    if (scanDetails.coordinates) {
+      const url = `https://www.google.com/maps?q=${scanDetails.coordinates}`;
+      window.open(url, "_blank");
+    }
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="right" className="w-[400px] sm:w-[540px]">
         <SheetHeader>
-          <SheetTitle className="text-xl font-semibold">
-            Scan {scanDetails.id}
-          </SheetTitle>
+          <SheetTitle className="text-xl font-semibold">Scan {scanDetails.id}</SheetTitle>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
           {/* Scan Result */}
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-gray-600">
-                Scan Result:
-              </span>
+              <span className="text-sm font-medium text-gray-600">Scan Result:</span>
               <div className="flex items-center space-x-2">
                 {isGenuine ? (
                   <CheckCircle className="h-5 w-5 text-green-500" />
                 ) : (
                   <XCircle className="h-5 w-5 text-red-500" />
                 )}
-                <span
-                  className={`font-semibold ${
-                    isGenuine ? 'text-green-600' : 'text-red-600'
-                  }`}
-                >
-                  {isGenuine ? 'Genuine' : 'Tampered'}
+                <span className={`font-semibold ${isGenuine ? "text-green-600" : "text-red-600"}`}>
+                  {isGenuine ? "Genuine" : "Tampered"}
                 </span>
               </div>
             </div>
@@ -96,31 +82,27 @@ const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({
               <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Location:</p>
-                <p className="text-sm text-green-600 font-medium">
+                <button
+                  onClick={openGoogleMaps}
+                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium text-left">
                   {scanDetails.location}
-                </p>
+                </button>
               </div>
             </div>
 
-            {/* <div className="flex items-start space-x-3">
+            <div className="flex items-start space-x-3">
               <Package className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-gray-600">
-                  QR Serial No:
-                </p>
-                <p className="text-sm text-green-600 font-medium">
-                  {scanDetails.qrSerialNo}
-                </p>
+                <p className="text-sm font-medium text-gray-600">QR Serial No:</p>
+                <p className="text-sm text-green-600 font-medium">{scanDetails.qrSerialNo}</p>
               </div>
-            </div> */}
+            </div>
 
             <div className="flex items-start space-x-3">
               <Package className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Product:</p>
-                <p className="text-sm text-green-600 font-medium">
-                  {scanDetails.product}
-                </p>
+                <p className="text-sm text-green-600 font-medium">{scanDetails.product}</p>
               </div>
             </div>
 
