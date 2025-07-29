@@ -83,7 +83,7 @@ const ProductDetails = () => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div>
+    <div className="p-4">
       <Card className="rounded-md min-h-full">
         <CardContent className="flex min-h-full p-0">
           {/* Left Section - Form */}

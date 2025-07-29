@@ -2,15 +2,16 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ProductApiResponse, ProductsFilter, QRDetailsResponse } from "@/lib/api/types";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useAxios } from "@/hooks/useAxios";
-import { downloadQR, getAllProductsQuery, getQR, updateQR } from "@/lib/api/methods";
+import { deleteQR, downloadQR, getAllProductsQuery, getQR, updateQR } from "@/lib/api/methods";
 import ActiveQRLandingPage from "@/components/ActiveQRLandingPage";
 import InActiveQRLandingPage from "@/components/InActiveQRLandingPage";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 interface LinkedProduct {
   id?: number;
@@ -21,6 +22,8 @@ interface LinkedProduct {
 
 const QRCodeDetails = () => {
   const params = useParams();
+  const navigate = useNavigate();
+
   const { data: products, isLoading: loadingProducts } = useAxios<ProductApiResponse, ProductsFilter>(
     getAllProductsQuery,
     { status: "Active", search: "" }
@@ -85,10 +88,19 @@ const QRCodeDetails = () => {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      await deleteQR(params.qrId);
+      navigate(-1);
+    } catch (error) {
+      alert(error);
+    }
+  };
+
   if (loadingQr || loadingProducts || loading) return <div>Loading...</div>;
 
   return (
-    <div>
+    <div className="p-4">
       <Card className="rounded-md min-h-full">
         <CardContent className="flex min-h-full p-0 justify-between">
           {/* Left Section - QR Details */}
@@ -208,7 +220,16 @@ const QRCodeDetails = () => {
               </TableBody>
             </Table>
 
-            <div className="absolute bottom-0 w-full flex justify-end p-6">
+            <div className="absolute bottom-0 w-full flex justify-between p-6">
+              <ConfirmDialog
+                message={`Are you sure you want to delete this QR fingerprint`}
+                onConfirm={handleDelete}
+                trigger={(open) => (
+                  <div className="bg-red-200 p-2 rounded-sm hover:cursor-pointer hover:bg-red-300" onClick={open}>
+                    <img src="/delete.png" alt="Delete" className="mx-auto rounded-md w-7 h-7" />
+                  </div>
+                )}
+              />
               <Button className="bg-green-600 hover:bg-green-700 px-8 py-5" onClick={handleSave}>
                 Save Details
               </Button>

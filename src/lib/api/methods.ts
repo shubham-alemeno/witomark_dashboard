@@ -164,3 +164,7 @@ export const downloadQR = async (id: string, format: string) => {
   );
   return response.data;
 };
+
+export const deleteQR = async (id: string) => {
+  await apiClient.delete(`/api/fingerprints/qr_fingerprints/${id}/`);
+};
