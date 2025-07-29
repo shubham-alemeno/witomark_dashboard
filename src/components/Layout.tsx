@@ -1,26 +1,22 @@
-import { Outlet, useLocation } from 'react-router-dom';
-import { Separator } from '@/components/ui/separator';
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from '@/components/ui/sidebar';
-import AppSidebar from '@/components/AppSidebar';
+import { Outlet, useLocation } from "react-router-dom";
+import { Separator } from "@/components/ui/separator";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import AppSidebar from "@/components/AppSidebar";
 
 // Page title mapping
 const pageTitles: Record<string, string> = {
-  '/': 'Dashboard',
-  '/dashboard': 'Dashboard',
-  '/qr-generator': 'QR Generator',
-  '/product-catalogue': 'Product Catalogue',
-  '/printers': 'Printers',
-  '/plan-details': 'Plan Details',
-  '/alerts': 'Alerts',
+  "/": "Witomark - Dashboard",
+  "/dashboard": "Witomark - Dashboard",
+  "/qr-generator": "QR Generator",
+  "/product-catalogue": "Product Catalogue",
+  "/printers": "Printers",
+  "/plan-details": "Plan Details",
+  "/alerts": "Alerts"
 };
 
 const Layout = () => {
   const location = useLocation();
-  const pageTitle = pageTitles[location.pathname] || 'Dashboard';
+  const pageTitle = pageTitles[location.pathname] || "Dashboard";
 
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -32,7 +28,7 @@ const Layout = () => {
             <Separator orientation="vertical" className="mx-2 h-4" />
             <div className="text-xl font-semibold">{pageTitle}</div>
           </header>
-          <div className="flex-1 p-4 md:p-6 overflow-auto">
+          <div className="flex-1 overflow-auto">
             <Outlet />
           </div>
         </SidebarInset>

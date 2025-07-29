@@ -63,6 +63,7 @@ export interface MapScanData {
   latitude: number;
   longitude: number;
   location: string;
+  qr_serial_number: string;
   result: ScanResult;
   company_name: string;
 }

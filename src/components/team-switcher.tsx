@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { ChevronsUpDown, Plus } from 'lucide-react';
+import * as React from "react";
+import { ChevronsUpDown, Plus } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -8,17 +8,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from '@/components/ui/sidebar';
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 
 export function TeamSwitcher({
-  teams,
+  teams
 }: {
   teams: {
     name: string;
@@ -26,7 +21,7 @@ export function TeamSwitcher({
     plan: string;
   }[];
 }) {
-  const { isMobile } = useSidebar();
+  const { state } = useSidebar();
   const [activeTeam, setActiveTeam] = React.useState(teams[0]);
 
   if (!activeTeam) {
@@ -40,14 +35,17 @@ export function TeamSwitcher({
           {/* <DropdownMenuTrigger asChild> */}
           <SidebarMenuButton
             size="lg"
-            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-          >
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-              <activeTeam.logo className="size-4" />
+            className={`data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground ${
+              state === "expanded" ? "" : "mt-2"
+            }`}>
+            <div className="flex items-center">
+              <img src="/witomark-favicon.png" alt="Witomark Icon" className="h-8 w-8" />
             </div>
-            <div className="grid flex-1 text-left text-xl leading-tight">
-              <span className="truncate font-bold">{activeTeam.name}</span>
-            </div>
+            {state === "expanded" && (
+              <div className="grid flex-1 text-left text-xl leading-tight">
+                <span className="truncate font-bold">{activeTeam.name}</span>
+              </div>
+            )}
             {/* <ChevronsUpDown className="ml-auto" /> */}
           </SidebarMenuButton>
           {/* </DropdownMenuTrigger> */}

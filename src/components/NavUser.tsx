@@ -31,6 +31,15 @@ export function NavUser({
     localStorage.removeItem("sentinel_dash_token");
     navigate("/login");
   };
+
+  const avatar = () => {
+    if (user.avatar) {
+      return <AvatarImage src={user.avatar} alt={user.username} />;
+    } else {
+      return user.username?.charAt(0);
+    }
+  };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -39,10 +48,7 @@ export function NavUser({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.username} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-              </Avatar>
+              {/* <Avatar className="h-8 w-8 rounded-lg">{avatar()}</Avatar> */}
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.username}</span>
                 <span className="truncate text-xs">{user.company_id}</span>
@@ -67,7 +73,7 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            {/* <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles />
@@ -89,10 +95,10 @@ export function NavUser({
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuSeparator /> */}
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOut />
-              <button onClick={handleLogout}>Log out</button>
+              <button>Log out</button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
