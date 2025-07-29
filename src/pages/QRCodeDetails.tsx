@@ -8,7 +8,7 @@ import { ProductApiResponse, ProductsFilter, QRDetailsResponse } from "@/lib/api
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useAxios } from "@/hooks/useAxios";
-import { getAllProductsQuery, getQR, updateQR } from "@/lib/api/methods";
+import { downloadQR, getAllProductsQuery, getQR, updateQR } from "@/lib/api/methods";
 import ActiveQRLandingPage from "@/components/ActiveQRLandingPage";
 import InActiveQRLandingPage from "@/components/InActiveQRLandingPage";
 
@@ -28,6 +28,7 @@ const QRCodeDetails = () => {
   const { data: qrData, isLoading: loadingQr, refetch } = useAxios<QRDetailsResponse, string>(getQR, params.qrId);
 
   const [status, setStatus] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const [linkedProduct, setLinkedProduct] = useState<LinkedProduct>({});
 
   useEffect(() => {
@@ -39,15 +40,52 @@ const QRCodeDetails = () => {
 
   const handleSave = async () => {
     try {
+      setLoading(true);
       await updateQR(params.qrId, { status, product: linkedProduct.id });
       await refetch();
       alert("Saved changes successfully");
     } catch (error) {
       alert(`Error: ${error}`);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loadingQr || loadingProducts) return <div>Loading...</div>;
+  const handleDownload = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const clickedId = e.currentTarget.id;
+
+    try {
+      setLoading(true);
+
+      const response = await downloadQR(qrData.fingerprint_id, clickedId);
+
+      let blob: Blob;
+
+      if (clickedId === "svg") {
+        blob = new Blob([response], { type: "image/svg+xml" });
+      } else {
+        // blob = response instanceof Blob ? response : new Blob([response], { type: "image/png" });
+        blob = new Blob([response], { type: "image/svg+xml" });
+      }
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `qr-${qrData.fingerprint_id}.${clickedId}`;
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      alert(`Error: ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loadingQr || loadingProducts || loading) return <div>Loading...</div>;
 
   return (
     <div>
@@ -83,7 +121,7 @@ const QRCodeDetails = () => {
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Download File:</TableCell>
                   <TableCell className="px-4 py-2">
                     <div className="flex space-x-4 mt-1">
-                      <div className="text-center space-y-1">
+                      {/* <div className="text-center space-y-1">
                         <img src="/witomark-qr.jpg" alt="QR 1" width={80} height={80} className="mx-auto border" />
                         <div className="text-sm">
                           <a href="#" className="text-green-600 hover:underline font-semibold">
@@ -94,15 +132,23 @@ const QRCodeDetails = () => {
                             PNG
                           </a>
                         </div>
-                      </div>
+                      </div> */}
                       <div className="text-center space-y-1">
                         <img src="/witomark-qr.jpg" alt="QR 2" width={80} height={80} className="mx-auto border" />
                         <div className="text-sm">
-                          <a href="#" className="text-green-600 hover:underline font-semibold">
+                          <a
+                            href="#"
+                            className="text-green-600 hover:underline font-semibold"
+                            id="svg"
+                            onClick={handleDownload}>
                             SVG
                           </a>{" "}
                           |{" "}
-                          <a href="#" className="text-green-600 hover:underline font-semibold">
+                          <a
+                            href="#"
+                            className="text-green-600 hover:underline font-semibold"
+                            id="png"
+                            onClick={handleDownload}>
                             PNG
                           </a>
                         </div>
