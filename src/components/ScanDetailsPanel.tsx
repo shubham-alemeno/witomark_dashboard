@@ -94,7 +94,7 @@ const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({ isOpen, onClose, sc
               <Package className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-gray-600">QR Serial No:</p>
-                <p className="text-sm text-green-600 font-medium">{scanDetails.qrSerialNo}</p>
+                <p className="text-sm text-green-600 font-medium">#{scanDetails.qrSerialNo}</p>
               </div>
             </div>
 

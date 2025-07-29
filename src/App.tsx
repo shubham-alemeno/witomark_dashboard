@@ -17,6 +17,7 @@ import QRCodeDetails from "./pages/QRCodeDetails";
 import ProductDetails from "./pages/ProductDetails";
 import BulkQRDownloader from "./pages/BulkQRDownloader";
 import BulkQREditor from "./pages/BulkQREditor";
+import ScanPage from "./pages/ScanPage";
 
 const App = () => (
   <TooltipProvider>
@@ -34,6 +35,7 @@ const App = () => (
           {/* Nested routes within the layout */}
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard/scan/:scanId" element={<ScanPage />} />
           <Route path="qr-generator" element={<QRGenerator />} />
           <Route path="qr-generator/:qrId" element={<QRCodeDetails />} />
           <Route path="product-catalogue" element={<ProductCatalogue />} />

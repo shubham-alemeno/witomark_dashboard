@@ -22,6 +22,7 @@ import WorldMap from "@/components/WorldMap";
 import ScanDetailsPanel from "@/components/ScanDetailsPanel";
 import { getMapStats, getMapScans } from "@/lib/api/methods";
 import { MapStatsResponse, MapScanData } from "@/lib/api/types";
+import { useNavigate } from "react-router-dom";
 
 // Types
 interface ScanData {
@@ -44,6 +45,7 @@ interface LocationData {
 
 const Dashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [viewType, setViewType] = useState("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState(""); // Actual search query sent to API
@@ -65,7 +67,7 @@ const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const pageSize = 20;
+  const pageSize = 100;
 
   // Helper function to get duration label
   const getDurationLabel = () => {
@@ -194,7 +196,13 @@ const Dashboard = () => {
   };
 
   const handleViewDetails = (scan: MapScanData) => {
-    // Convert scan data to the format expected by ScanDetailsPanel
+    // For list view, navigate to scan page
+    if (viewType === "list") {
+      navigate(`/dashboard/scan/${scan.scan_id}`);
+      return;
+    }
+
+    // For map view, keep the side panel behavior
     const scanDetails = {
       id: scan.scan_id,
       result: scan.result.value === 1 ? "genuine" : "tampered",
@@ -449,7 +457,7 @@ const Dashboard = () => {
                         <button
                           onClick={() => openGoogleMaps(scan.latitude, scan.longitude)}
                           className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer 
-               overflow-hidden text-ellipsis whitespace-nowrap max-w-full text-left">
+               overflow-hidden text-ellipsis whitespace-nowrap max-w-80 2xl:max-w-full text-left">
                           {scan.location}
                         </button>
                       </TableCell>

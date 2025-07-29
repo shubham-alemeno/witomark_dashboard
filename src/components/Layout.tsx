@@ -6,7 +6,7 @@ import AppSidebar from "@/components/AppSidebar";
 // Page title mapping
 const pageTitles: Record<string, string> = {
   "/": "Witomark - Dashboard",
-  "/dashboard": "Witomark - Dashboard",
+  "/dashboard": "Dashboard",
   "/qr-generator": "QR Generator",
   "/product-catalogue": "Product Catalogue",
   "/printers": "Printers",
@@ -16,7 +16,16 @@ const pageTitles: Record<string, string> = {
 
 const Layout = () => {
   const location = useLocation();
-  const pageTitle = pageTitles[location.pathname] || "Dashboard";
+
+  // Handle dynamic page titles for scan pages
+  const getPageTitle = () => {
+    if (location.pathname.startsWith("/dashboard/scan/")) {
+      return "Scan Details";
+    }
+    return pageTitles[location.pathname] || "Dashboard";
+  };
+
+  const pageTitle = getPageTitle();
 
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
