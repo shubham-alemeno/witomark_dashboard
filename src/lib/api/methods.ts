@@ -12,7 +12,9 @@ import {
   UpdateProductRequest,
   QRFilters,
   BulkQRCreateRequest,
-  ListQRResponse
+  ListQRResponse,
+  Fingerprint,
+  QRDetailsResponse
 } from "./types";
 
 // Dashboard API Methods
@@ -122,7 +124,7 @@ export const createQR = async (data: BulkQRCreateRequest) => {
   return response;
 };
 
-export const getQR = async (id: string) => {
+export const getQR = async (id: string): Promise<QRDetailsResponse> => {
   const response = await apiClient.get(`/api/fingerprints/qr_fingerprints/${id}/`);
   return response.data;
 };
