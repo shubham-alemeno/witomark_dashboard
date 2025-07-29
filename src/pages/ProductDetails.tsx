@@ -27,12 +27,12 @@ const ProductDetails = () => {
     (async () => {
       setLoading(true);
       const response = await getProduct(params.productId);
-      console.log(response);
+      console.log(response.qr_fingerprints);
       setProductName(response.product_name);
       setProductDescription(response.product_description);
-      setImagePreview(response.product_image_url);
+      setImagePreview(response.product_image);
       setStatus(response.status);
-
+      setLinkedQRs(response.qr_fingerprints);
       setLoading(false);
     })();
   }, []);
@@ -163,7 +163,17 @@ const ProductDetails = () => {
                 </TableRow>
                 <TableRow className="border-b">
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Linked QR Serial:</TableCell>
-                  <TableCell className="px-4 py-2 font-semibold">#11</TableCell>
+                  <TableCell className="px-4 py-2 font-semibold">
+                    {"["}{" "}
+                    {linkedQRs.map((qr, index) =>
+                      linkedQRs.length === index + 1 ? (
+                        <span key={qr.serial_number}>#{qr.serial_number}</span>
+                      ) : (
+                        <span key={qr.serial_number}>#{qr.serial_number}, </span>
+                      )
+                    )}{" "}
+                    {"]"}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -196,7 +206,7 @@ const ProductDetails = () => {
                 <h1 className="font-semibold text-sm text-left px-3 line-clamp-1">{productName}</h1>
                 <p className="text-xs text-left px-3 line-clamp-3 mb-2">{productDescription}</p>
                 {imagePreview ? (
-                  <img src={imagePreview} alt="Product" className="w-full object-cover h-[170px]" />
+                  <img src={imagePreview} alt="Product" className="w-full object-cover h-[155px]" />
                 ) : null}
               </div>
               <div className="mt-4 px-4 flex items-center justify-center gap-2 text-sm text-gray-700">

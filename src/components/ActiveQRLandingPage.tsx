@@ -13,18 +13,18 @@ const ActiveQRLandingPage: React.FC<Props> = (props) => {
     <div className="bg-gray-100 w-full text-black">
       <div className="flex flex-col w-full">
         <div className="w-full flex items-center justify-center p-2">
-          <img src="/witomark-logo.png" alt="sentinel-logo" width={120} height={120} />
+          <img src="/witomark-logo.png" alt="sentinel-logo" width={100} height={100} />
         </div>
 
         {/* Left side - Image */}
         <div className="w-full flex flex-col">
           {productName && (
             <div
-              className={`text-black bg-white p-4 px-3 border-t-2 border-t-gray-300 ${
+              className={`text-black bg-white p-1 px-3 border-t-2 border-t-gray-300 ${
                 !productImage && "border-b-2 border-b-gray-300 text-left"
               }`}>
-              <h1 className="text-md font-bold mb-1 line-clamp-1">{productName}</h1>
-              {productDetails && <p className="line-clamp-3 text-xs">{productDetails}</p>}
+              <h1 className="text-md font-bold line-clamp-1 text-left">{productName}</h1>
+              {productDetails && <p className="line-clamp-3 text-xs text-left">{productDetails}</p>}
             </div>
           )}
           {productName ? (
@@ -33,7 +33,7 @@ const ActiveQRLandingPage: React.FC<Props> = (props) => {
                 <img
                   src={productImage}
                   alt="hero-image"
-                  className="object-cover w-full md:h-screen h-[205px]"
+                  className="object-cover w-full h-[135px]"
                   width={300}
                   height={300}
                 />
@@ -44,7 +44,7 @@ const ActiveQRLandingPage: React.FC<Props> = (props) => {
               <img
                 src={"/witomark-image.jpg"}
                 alt="hero-image"
-                className="object-cover w-full h-auto md:h-screen max-h-[200px]"
+                className="object-cover w-full max-h-[200px]"
                 width={300}
                 height={300}
               />
@@ -52,7 +52,7 @@ const ActiveQRLandingPage: React.FC<Props> = (props) => {
           )}
         </div>
         {status === "Compromised" && (
-          <div className="bg-[#ad494b] text-white w-full p-3 py-2">
+          <div className="bg-[#ad494b] text-white w-full px-3 py-2">
             <p className="text-xs text-left">
               <b>Warning!</b> This QR was compromised, be extra cautious. The product could be fake even if verification
               shows it as genuine

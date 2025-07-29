@@ -23,7 +23,7 @@ interface LinkedProduct {
   id?: number;
   product_name?: string;
   product_description?: string;
-  product_image_url?: string;
+  product_image?: string;
 }
 
 const QRCodeDetails = () => {
@@ -165,7 +165,7 @@ const QRCodeDetails = () => {
             </div>
           </div>
           {/* Right Section - Webpage Preview */}
-          <div className=" max-w-[450px]  bg-green-500 px-20 pb-8 pt-5 rounded-r-md">
+          <div className=" max-w-[460px]  bg-green-500 px-20 pb-8 pt-5 rounded-r-md">
             <div className="text-white text-sm py-2 text-center">
               Webpage preview
               <br />
@@ -177,7 +177,7 @@ const QRCodeDetails = () => {
                   status={qrData.status}
                   productName={linkedProduct?.product_name}
                   productDetails={linkedProduct?.product_description}
-                  productImage={linkedProduct?.product_image_url}
+                  productImage={linkedProduct?.product_image}
                 />
               ) : (
                 <InActiveQRLandingPage status={qrData.status} />

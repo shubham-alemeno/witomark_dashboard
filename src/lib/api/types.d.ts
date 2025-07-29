@@ -118,13 +118,14 @@ export interface ProductResponse {
   company_name: string;
   company_code: string;
   product_name: string;
-  product_image_url: string;
+  product_image: string;
   product_image_preview: string;
   product_details: {
     origin: string;
     weight: string;
   };
   product_description: string;
+  qr_fingerprints: Fingerprint[];
   product_sku: string;
   status: string;
   qr_fingerprints_count: number;
