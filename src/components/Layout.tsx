@@ -5,7 +5,7 @@ import AppSidebar from "@/components/AppSidebar";
 
 // Page title mapping
 const pageTitles: Record<string, string> = {
-  "/": "Witomark - Dashboard",
+  "/": "Dashboard",
   "/dashboard": "Dashboard",
   "/qr-generator": "QR Generator",
   "/product-catalogue": "Product Catalogue",
