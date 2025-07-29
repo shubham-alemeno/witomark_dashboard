@@ -128,9 +128,9 @@ const ScanPage: React.FC = () => {
       </div> */}
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 h-[calc(100vh-200px)]">
         {/* Scan Details */}
-        <div className="bg-white p-6 rounded-lg h-fit">
+        <div className="bg-white p-6 rounded-lg">
           <div className="space-y-3">
             {/* Scan Result */}
             <div className="grid grid-cols-3">
@@ -146,19 +146,19 @@ const ScanPage: React.FC = () => {
                 </span>
               </div>
             </div>
-
+            <hr />
             {/* Scan ID */}
             <div className="grid grid-cols-3">
               <span className="text-sm col-span-1 font-medium text-gray-600">Scan ID:</span>
               <span className="text-sm col-span-2 text-gray-900 font-medium">{scanDetails.scanId}</span>
             </div>
-
+            <hr />
             {/* Scan Date */}
             <div className="grid grid-cols-3">
               <span className="text-sm col-span-1 font-medium text-gray-600">Scan Date:</span>
               <span className="text-sm col-span-2 text-gray-900">{scanDetails.scanDate}</span>
             </div>
-
+            <hr />
             {/* Location */}
             <div className="grid grid-cols-3">
               <span className="text-sm col-span-1 font-medium text-gray-600">Location:</span>
@@ -168,13 +168,13 @@ const ScanPage: React.FC = () => {
                 {scanDetails.location}
               </button>
             </div>
-
+            <hr />
             {/* QR Serial No */}
             <div className="grid grid-cols-3">
               <span className="text-sm col-span-1 font-medium text-gray-600">QR Serial No:</span>
               <span className="text-sm col-span-2 text-green-600 font-medium">#{scanDetails.qrSerialNo}</span>
             </div>
-
+            <hr />
             {/* Product */}
             <div className="grid grid-cols-3">
               <span className="text-sm col-span-1 font-medium text-gray-600">Product:</span>
@@ -182,14 +182,14 @@ const ScanPage: React.FC = () => {
                 {scanDetails.product}
               </span>
             </div>
-
+            <hr />
             {/* Device Details */}
-            <div className="grid grid-cols-3">
+            {/* <div className="grid grid-cols-3">
               <span className="text-sm col-span-1 font-medium text-gray-600">Device details:</span>
               <span className="text-sm col-span-2 text-gray-900 max-w-[200px] truncate text-left">
                 {scanDetails.deviceDetails}
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
 
