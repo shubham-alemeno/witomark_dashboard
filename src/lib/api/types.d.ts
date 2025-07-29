@@ -213,3 +213,8 @@ export interface QRDetailsResponse {
   created_at: string;
   updated_at: string;
 }
+
+export interface UpdateQRRequest {
+  status?: string;
+  product?: number;
+}

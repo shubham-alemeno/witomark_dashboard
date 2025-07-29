@@ -14,7 +14,8 @@ import {
   BulkQRCreateRequest,
   ListQRResponse,
   Fingerprint,
-  QRDetailsResponse
+  QRDetailsResponse,
+  UpdateQRRequest
 } from "./types";
 
 // Dashboard API Methods
@@ -138,6 +139,18 @@ export const listQRQuery = async (args?: QRFilters, page = 1, limit = 10): Promi
   const { search, sort, status } = args;
   const response = await apiClient.get(
     `/api/fingerprints/qr_fingerprints/?search=${search}&sort=${sort}&status=${status}`
+  );
+  return response.data;
+};
+
+export const updateQR = async (id: string, args?: UpdateQRRequest) => {
+  const response = await apiClient.patch(`/api/fingerprints/qr_fingerprints/${id}/`, args);
+  return response;
+};
+
+export const downloadQR = async (id: string, format: string) => {
+  const response = await apiClient.get(
+    `/api/fingerprints/download-fingerprint/?fingerprint_id=${id}&file_format=${format}`
   );
   return response.data;
 };

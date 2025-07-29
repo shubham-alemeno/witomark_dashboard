@@ -4,18 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Fingerprint, ProductApiResponse, ProductsFilter, QRDetailsResponse } from "@/lib/api/types";
+import { ProductApiResponse, ProductsFilter, QRDetailsResponse } from "@/lib/api/types";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectScrollDownButton,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useAxios } from "@/hooks/useAxios";
-import { getAllProducts, getAllProductsQuery, getQR } from "@/lib/api/methods";
+import { getAllProductsQuery, getQR, updateQR } from "@/lib/api/methods";
 import ActiveQRLandingPage from "@/components/ActiveQRLandingPage";
 import InActiveQRLandingPage from "@/components/InActiveQRLandingPage";
 
@@ -28,12 +21,11 @@ interface LinkedProduct {
 
 const QRCodeDetails = () => {
   const params = useParams();
-  const {
-    data: products,
-    isLoading: loadingProducts,
-    error
-  } = useAxios<ProductApiResponse, ProductsFilter>(getAllProductsQuery, { status: "Active", search: "" });
-  const { data: qrData, isLoading: loadingQr } = useAxios<QRDetailsResponse, string>(getQR, params.qrId);
+  const { data: products, isLoading: loadingProducts } = useAxios<ProductApiResponse, ProductsFilter>(
+    getAllProductsQuery,
+    { status: "Active", search: "" }
+  );
+  const { data: qrData, isLoading: loadingQr, refetch } = useAxios<QRDetailsResponse, string>(getQR, params.qrId);
 
   const [status, setStatus] = useState<string>("");
   const [linkedProduct, setLinkedProduct] = useState<LinkedProduct>({});
@@ -44,6 +36,16 @@ const QRCodeDetails = () => {
       setStatus(qrData.status);
     }
   }, [products, loadingQr]);
+
+  const handleSave = async () => {
+    try {
+      await updateQR(params.qrId, { status, product: linkedProduct.id });
+      await refetch();
+      alert("Saved changes successfully");
+    } catch (error) {
+      alert(`Error: ${error}`);
+    }
+  };
 
   if (loadingQr || loadingProducts) return <div>Loading...</div>;
 
@@ -118,9 +120,9 @@ const QRCodeDetails = () => {
                     <span className="font-medium font-semibold">{linkedProduct?.product_name ?? ""}</span>
                     <span className="ml-3 font-semibold">|</span>
                     <Select
-                      value={status}
-                      onValueChange={(val) => {
-                        setStatus(val);
+                      value={linkedProduct?.id?.toString() ?? ""}
+                      onValueChange={(id) => {
+                        setLinkedProduct(products.results.find((p) => p.id === parseInt(id)));
                       }}>
                       <SelectTrigger className="w-32 border-none shadow-none h-5 relative hover:border-none focus:outline-none focus:ring-0 [&>svg]:hidden">
                         <span className="text-sm text-green-600 font-semibold">Link Product</span>
@@ -161,7 +163,9 @@ const QRCodeDetails = () => {
             </Table>
 
             <div className="absolute bottom-0 w-full flex justify-end p-6">
-              <Button className="bg-green-600 hover:bg-green-700 px-8 py-5">Save Details</Button>
+              <Button className="bg-green-600 hover:bg-green-700 px-8 py-5" onClick={handleSave}>
+                Save Details
+              </Button>
             </div>
           </div>
           {/* Right Section - Webpage Preview */}
@@ -172,15 +176,15 @@ const QRCodeDetails = () => {
               <span className="underline cursor-pointer text-xs">Link or Unlink product to change web preview</span>
             </div>
             <div className="text-center h-[450px] bg-gray-100 mx-6">
-              {qrData.status === "Active" || qrData.status === "Compromised" ? (
+              {status === "Active" || status === "Compromised" ? (
                 <ActiveQRLandingPage
-                  status={qrData.status}
+                  status={status}
                   productName={linkedProduct?.product_name}
                   productDetails={linkedProduct?.product_description}
                   productImage={linkedProduct?.product_image}
                 />
               ) : (
-                <InActiveQRLandingPage status={qrData.status} />
+                <InActiveQRLandingPage status={status} />
               )}
             </div>
           </div>
