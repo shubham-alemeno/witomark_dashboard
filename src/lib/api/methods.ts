@@ -12,7 +12,10 @@ import {
   UpdateProductRequest,
   QRFilters,
   BulkQRCreateRequest,
-  ListQRResponse
+  ListQRResponse,
+  Fingerprint,
+  QRDetailsResponse,
+  UpdateQRRequest
 } from "./types";
 
 // Dashboard API Methods
@@ -132,7 +135,7 @@ export const createQR = async (data: BulkQRCreateRequest) => {
   return response;
 };
 
-export const getQR = async (id: string) => {
+export const getQR = async (id: string): Promise<QRDetailsResponse> => {
   const response = await apiClient.get(`/api/fingerprints/qr_fingerprints/${id}/`);
   return response.data;
 };
@@ -148,4 +151,20 @@ export const listQRQuery = async (args?: QRFilters, page = 1, limit = 10): Promi
     `/api/fingerprints/qr_fingerprints/?search=${search}&sort=${sort}&status=${status}`
   );
   return response.data;
+};
+
+export const updateQR = async (id: string, args?: UpdateQRRequest) => {
+  const response = await apiClient.patch(`/api/fingerprints/qr_fingerprints/${id}/`, args);
+  return response;
+};
+
+export const downloadQR = async (id: string, format: string) => {
+  const response = await apiClient.get(
+    `/api/fingerprints/download-fingerprint/?fingerprint_id=${id}&file_format=${format}`
+  );
+  return response.data;
+};
+
+export const deleteQR = async (id: string) => {
+  await apiClient.delete(`/api/fingerprints/qr_fingerprints/${id}/`);
 };
