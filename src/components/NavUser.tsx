@@ -1,4 +1,4 @@
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react";
+import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles, User } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -24,7 +24,7 @@ export function NavUser({
     company_id?: string;
   };
 }) {
-  const { isMobile } = useSidebar();
+  const { isMobile, state } = useSidebar();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -48,12 +48,22 @@ export function NavUser({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-              {/* <Avatar className="h-8 w-8 rounded-lg">{avatar()}</Avatar> */}
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.username}</span>
-                <span className="truncate text-xs">{user.company_id}</span>
-              </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              {state === "collapsed" ? (
+                <User className="h-5 w-5 mx-auto" />
+              ) : (
+                <>
+                  {/* <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarFallback className="rounded-lg">
+                      {user.username?.charAt(0)?.toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar> */}
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">{user.username}</span>
+                    <span className="truncate text-xs">{user.company_id}</span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4" />
+                </>
+              )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

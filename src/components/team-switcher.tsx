@@ -38,12 +38,25 @@ export function TeamSwitcher({
             className={`data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground ${
               state === "expanded" ? "" : "mt-2"
             }`}>
-            <div className="flex items-center">
-              {state === "expanded" ? (
-                <img src="/witomark-logo.png" alt="Witomark Logo" className="h-8" />
-              ) : (
-                <img src="/witomark-favicon.png" alt="Witomark Icon" className="h-7 w-7 ml-0.5" />
-              )}
+            <div className="flex items-center relative overflow-hidden">
+              <img
+                src="/witomark-logo.png"
+                alt="Witomark Logo"
+                className={`h-8 transition-all duration-300 ease-in-out ${
+                  state === "expanded"
+                    ? "opacity-100 scale-100 translate-x-0"
+                    : "opacity-0 scale-95 -translate-x-2"
+                }`}
+              />
+              <img
+                src="/witomark-favicon.png"
+                alt="Witomark Icon"
+                className={`h-7 w-7 ml-0.5 absolute transition-all duration-300 ease-in-out ${
+                  state === "expanded"
+                    ? "opacity-0 scale-95 translate-x-2"
+                    : "opacity-100 scale-100 translate-x-0"
+                }`}
+              />
             </div>
             {/* {state === "expanded" && (
               <div className="grid flex-1 text-left text-xl leading-tight">
