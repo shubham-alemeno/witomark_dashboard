@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 
 // Page title mapping
 const pageTitles: Record<string, string> = {
@@ -20,12 +21,16 @@ const Layout = () => {
   // Handle dynamic page titles for scan pages
   const getPageTitle = () => {
     if (location.pathname.startsWith("/dashboard/scan/")) {
-      return "Scan Details";
+      const scanId = location.pathname.split("/").pop();
+      return `Scan #${scanId}`;
     }
     return pageTitles[location.pathname] || "Dashboard";
   };
 
   const pageTitle = getPageTitle();
+
+  // Set document title
+  useDocumentTitle(pageTitle);
 
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">

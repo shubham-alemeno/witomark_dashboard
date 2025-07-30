@@ -252,7 +252,7 @@ const Dashboard = () => {
       <div className="flex items-start justify-between gap-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
-          <Card className="bg-orange-50">
+          <Card className="bg-[#ffebc7]">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -269,7 +269,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-green-50">
+          <Card className="bg-[#c6f4ee]">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -286,7 +286,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-red-50">
+          <Card className="bg-[#ffe1e1]">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -377,8 +377,8 @@ const Dashboard = () => {
                 />
                 <button
                   onClick={handleSearch}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#02bc5f] hover:text-[#029951] transition-colors">
-                  <Search className="h-4 w-4" />
+                  className="absolute right-0 top-0 h-9 w-10 flex rounded-r-md justify-center items-center bg-gray-300">
+                  <Search className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
 
@@ -410,7 +410,7 @@ const Dashboard = () => {
           <CardContent>
             <Table>
               <TableHeader>
-                <TableRow className="border-none">
+                <TableRow className="border-none bg-gray-100">
                   <TableHead className="text-left font-medium text-gray-900">Result</TableHead>
                   <TableHead className="text-left font-medium text-gray-900">Scan ID</TableHead>
                   <TableHead className="text-left font-medium text-gray-900">Product Name</TableHead>
@@ -440,7 +440,7 @@ const Dashboard = () => {
                   </TableRow>
                 ) : (
                   scanData?.map((scan, index) => (
-                    <TableRow key={scan.scan_id || index} className="border-none hover:bg-gray-50">
+                    <TableRow key={scan.scan_id || index} className="border-b border-gray-200 hover:bg-gray-50">
                       <TableCell>
                         <div className="flex items-center">
                           <img
@@ -451,12 +451,12 @@ const Dashboard = () => {
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{scan.scan_id}</TableCell>
-                      <TableCell>{scan.product_name}</TableCell>
+                      <TableCell>{scan.product_name === "Unknown Product" ? "-" : scan.product_name}</TableCell>
                       <TableCell className="text-gray-600">{new Date(scan.scan_time).toLocaleString()}</TableCell>
                       <TableCell className="text-gray-600">
                         <button
                           onClick={() => openGoogleMaps(scan.latitude, scan.longitude)}
-                          className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer 
+                          className="text-[#02bc5f] hover:text-[#029951] font-medium hover:underline cursor-pointer 
                overflow-hidden text-ellipsis whitespace-nowrap max-w-80 2xl:max-w-full text-left">
                           {scan.location}
                         </button>
@@ -464,7 +464,6 @@ const Dashboard = () => {
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
-                          size="sm"
                           className="text-[#02bc5f] hover:text-[#029951]"
                           onClick={() => handleViewDetails(scan)}>
                           View details

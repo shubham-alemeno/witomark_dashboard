@@ -59,10 +59,10 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <img src="/witomark-favicon.png" alt="Witomark Logo" className="h-16 w-16" />
+          <div className="flex justify-center">
+            <img src="/witomark-logo.png" alt="Witomark Logo" className="h-12" />
           </div>
-          <CardTitle className="text-2xl">Witomark - Login</CardTitle>
+          <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>Enter your credentials below to login to your account</CardDescription>
         </CardHeader>
         <CardContent>
@@ -80,7 +80,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                 <Input
                   id="username"
                   type="text"
-                  placeholder="username"
+                  placeholder="Enter your username"
                   required
                   disabled={isLoading}
                   value={username}
@@ -101,6 +101,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                 <Input
                   id="password"
                   type="password"
+                  placeholder="Enter your password"
                   required
                   disabled={isLoading}
                   value={password}

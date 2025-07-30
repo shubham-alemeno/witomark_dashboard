@@ -1,6 +1,6 @@
 import React from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { CheckCircle, XCircle, MapPin, Calendar, Smartphone, Package } from "lucide-react";
+import { MapPin, Calendar, Smartphone, Package } from "lucide-react";
 
 interface ScanDetails {
   id: string;
@@ -48,14 +48,12 @@ const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({ isOpen, onClose, sc
             <div className="flex items-center space-x-2">
               <span className="text-sm font-medium text-gray-600">Scan Result:</span>
               <div className="flex items-center space-x-2">
-                {isGenuine ? (
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                ) : (
-                  <XCircle className="h-5 w-5 text-red-500" />
-                )}
-                <span className={`font-semibold ${isGenuine ? "text-green-600" : "text-red-600"}`}>
-                  {isGenuine ? "Genuine" : "Tampered"}
-                </span>
+                <img
+                  src={isGenuine ? "/result-genuine.png" : "/result-counterfeit.png"}
+                  alt={isGenuine ? "Genuine" : "Counterfeit"}
+                  className="w-5 h-5"
+                />
+                <span className="font-semibold text-black">{isGenuine ? "Genuine" : "Tampered"}</span>
               </div>
             </div>
           </div>
@@ -84,7 +82,7 @@ const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({ isOpen, onClose, sc
                 <p className="text-sm font-medium text-gray-600">Location:</p>
                 <button
                   onClick={openGoogleMaps}
-                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-medium text-left">
+                  className="text-sm text-[#02bc5f] hover:text-[#029951] hover:underline cursor-pointer font-medium text-left">
                   {scanDetails.location}
                 </button>
               </div>
@@ -94,7 +92,7 @@ const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({ isOpen, onClose, sc
               <Package className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-gray-600">QR Serial No:</p>
-                <p className="text-sm text-green-600 font-medium">#{scanDetails.qrSerialNo}</p>
+                <p className="text-sm text-black font-medium">#{scanDetails.qrSerialNo}</p>
               </div>
             </div>
 
@@ -102,7 +100,7 @@ const ScanDetailsPanel: React.FC<ScanDetailsPanelProps> = ({ isOpen, onClose, sc
               <Package className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Product:</p>
-                <p className="text-sm text-green-600 font-medium">{scanDetails.product}</p>
+                <p className="text-sm text-black font-medium">{scanDetails.product}</p>
               </div>
             </div>
 

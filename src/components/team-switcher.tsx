@@ -39,13 +39,17 @@ export function TeamSwitcher({
               state === "expanded" ? "" : "mt-2"
             }`}>
             <div className="flex items-center">
-              <img src="/witomark-favicon.png" alt="Witomark Icon" className="h-8 w-8" />
+              {state === "expanded" ? (
+                <img src="/witomark-logo.png" alt="Witomark Logo" className="h-8" />
+              ) : (
+                <img src="/witomark-favicon.png" alt="Witomark Icon" className="h-7 w-7 ml-0.5" />
+              )}
             </div>
-            {state === "expanded" && (
+            {/* {state === "expanded" && (
               <div className="grid flex-1 text-left text-xl leading-tight">
                 <span className="truncate font-bold">{activeTeam.name}</span>
               </div>
-            )}
+            )} */}
             {/* <ChevronsUpDown className="ml-auto" /> */}
           </SidebarMenuButton>
           {/* </DropdownMenuTrigger> */}

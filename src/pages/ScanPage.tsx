@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, MapPin, ArrowLeft } from "lucide-react";
+import { MapPin, ArrowLeft } from "lucide-react";
 import { getMapScans } from "@/lib/api/methods";
 import { MapScanData } from "@/lib/api/types";
 import WorldMap from "@/components/WorldMap";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 
 interface ScanDetails {
   id: string;
@@ -27,6 +28,9 @@ const ScanPage: React.FC = () => {
   const [scanDetails, setScanDetails] = useState<ScanDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Set document title
+  useDocumentTitle(scanId ? `Scan #${scanId}` : "Scan Details");
 
   useEffect(() => {
     const fetchScanDetails = async () => {
@@ -60,7 +64,7 @@ const ScanPage: React.FC = () => {
           latitude: scan.latitude,
           longitude: scan.longitude,
           qrSerialNo: scan.qr_serial_number,
-          product: scan.product_name,
+          product: scan.product_name === "Unknown product" ? "-" : scan.product_name,
           deviceDetails: "Device details not available"
         };
 
@@ -136,14 +140,12 @@ const ScanPage: React.FC = () => {
             <div className="grid grid-cols-3">
               <span className="text-sm col-span-1 font-medium text-gray-600">Scan Result:</span>
               <div className="flex items-center space-x-2">
-                {isGenuine ? (
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                ) : (
-                  <XCircle className="h-5 w-5 text-red-500" />
-                )}
-                <span className={`font-semibold ${isGenuine ? "text-green-600" : "text-red-600"}`}>
-                  {isGenuine ? "Genuine" : "Tampered"}
-                </span>
+                <img
+                  src={isGenuine ? "/result-genuine.png" : "/result-counterfeit.png"}
+                  alt={isGenuine ? "Genuine" : "Counterfeit"}
+                  className="w-5 h-5"
+                />
+                <span className="font-semibold text-black">{isGenuine ? "Genuine" : "Tampered"}</span>
               </div>
             </div>
             <hr />
@@ -164,7 +166,7 @@ const ScanPage: React.FC = () => {
               <span className="text-sm col-span-1 font-medium text-gray-600">Location:</span>
               <button
                 onClick={openGoogleMaps}
-                className="text-sm col-span-2 text-green-600 hover:text-green-800 hover:underline cursor-pointer font-medium text-left">
+                className="text-sm col-span-2 text-[#02bc5f] hover:text-[#029951] hover:underline cursor-pointer font-medium text-left">
                 {scanDetails.location}
               </button>
             </div>
@@ -172,14 +174,14 @@ const ScanPage: React.FC = () => {
             {/* QR Serial No */}
             <div className="grid grid-cols-3">
               <span className="text-sm col-span-1 font-medium text-gray-600">QR Serial No:</span>
-              <span className="text-sm col-span-2 text-green-600 font-medium">#{scanDetails.qrSerialNo}</span>
+              <span className="text-sm col-span-2 text-black font-medium">#{scanDetails.qrSerialNo}</span>
             </div>
             <hr />
             {/* Product */}
             <div className="grid grid-cols-3">
               <span className="text-sm col-span-1 font-medium text-gray-600">Product:</span>
-              <span className="text-sm col-span-2 text-green-600 font-medium max-w-[200px] truncate text-left">
-                {scanDetails.product}
+              <span className="text-sm col-span-2 text-black font-medium max-w-[200px] truncate text-left">
+                {scanDetails.product === "Unknown Product" ? "-" : scanDetails.product}
               </span>
             </div>
             <hr />
