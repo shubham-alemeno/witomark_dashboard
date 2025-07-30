@@ -362,49 +362,52 @@ const Dashboard = () => {
         <Card className="bg-white">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-semibold">Scan data</CardTitle>
+              <div className="flex gap-6">
+                <CardTitle className="text-lg font-semibold">Scan data</CardTitle>
+                <div className="relative flex-1">
+                  <div className="w-[300px]">
+                    <Input
+                      placeholder="Search product by name"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                      className="w-full pr-10 h-8"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSearch}
+                    className="absolute right-0 top-0 h-8 w-10 flex rounded-r-md justify-center items-center bg-gray-300">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-48 h-8">
+                    <SelectValue placeholder="Sort by: Latest first" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="latest">Sort by: Latest first</SelectItem>
+                    <SelectItem value="oldest">Sort by: Oldest first</SelectItem>
+                    {/* <SelectItem value="name-asc">Sort by: Name A-Z</SelectItem>
+                  <SelectItem value="name-desc">Sort by: Name Z-A</SelectItem> */}
+                  </SelectContent>
+                </Select>
+
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-32 h-8">
+                    <SelectValue placeholder="Status: All" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Status: All</SelectItem>
+                    <SelectItem value="genuine">Status: Genuine</SelectItem>
+                    <SelectItem value="tampered">Status: Tampered</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Search and Filters */}
-            <div className="flex items-center gap-4 mt-4">
-              <div className="relative flex-1 max-w-sm">
-                <Input
-                  placeholder="Search product by name"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  className="pr-10"
-                />
-                <button
-                  onClick={handleSearch}
-                  className="absolute right-0 top-0 h-9 w-10 flex rounded-r-md justify-center items-center bg-gray-300">
-                  <Search className="h-4 w-4 text-muted-foreground" />
-                </button>
-              </div>
-
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Sort by: Latest first" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="latest">Sort by: Latest first</SelectItem>
-                  <SelectItem value="oldest">Sort by: Oldest first</SelectItem>
-                  {/* <SelectItem value="name-asc">Sort by: Name A-Z</SelectItem>
-                  <SelectItem value="name-desc">Sort by: Name Z-A</SelectItem> */}
-                </SelectContent>
-              </Select>
-
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Status: All" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Status: All</SelectItem>
-                  <SelectItem value="genuine">Status: Genuine</SelectItem>
-                  <SelectItem value="tampered">Status: Tampered</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </CardHeader>
 
           <CardContent>

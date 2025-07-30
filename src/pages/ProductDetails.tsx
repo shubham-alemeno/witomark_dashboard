@@ -90,11 +90,11 @@ const ProductDetails = () => {
           <div className="relative w-3/5 pt-1">
             <Table className="w-full table-auto text-left text-sm text-gray-700">
               <TableBody className="text-black">
-                <TableRow className="border-b">
+                <TableRow className="border-b hover:bg-transparent">
                   <TableCell className="w-1/4 px-4 py-2 font-semibold text-gray-600">Product ID:</TableCell>
                   <TableCell className="px-4 py-2 font-semibold">#{params.productId}</TableCell>
                 </TableRow>
-                <TableRow className="border-b">
+                <TableRow className="border-b hover:bg-transparent">
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Product Name:</TableCell>
                   <TableCell className="px-4 py-2">
                     <input
@@ -105,7 +105,7 @@ const ProductDetails = () => {
                     />
                   </TableCell>
                 </TableRow>
-                <TableRow className="border-b">
+                <TableRow className="border-b hover:bg-transparent">
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Product Description:</TableCell>
                   <TableCell className="px-4 py-2">
                     <textarea
@@ -116,7 +116,7 @@ const ProductDetails = () => {
                     />
                   </TableCell>
                 </TableRow>
-                <TableRow className="border-b align-top">
+                <TableRow className="border-b align-top hover:bg-transparent">
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Product Image:</TableCell>
                   <TableCell className="px-4 py-2 space-y-2">
                     {imageFile ? (
@@ -147,7 +147,7 @@ const ProductDetails = () => {
                     )}
                   </TableCell>
                 </TableRow>
-                <TableRow className="border-b">
+                <TableRow className="border-b hover:bg-transparent">
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Status:</TableCell>
                   <TableCell className="px-4 py-2 font-semibold">
                     <Select value={status} onValueChange={setStatus}>
@@ -161,7 +161,7 @@ const ProductDetails = () => {
                     </Select>
                   </TableCell>
                 </TableRow>
-                <TableRow className="border-b">
+                <TableRow className="border-b hover:bg-transparent">
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Linked QR Serial:</TableCell>
                   <TableCell className="px-4 py-2 font-semibold">
                     {"["}{" "}

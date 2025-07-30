@@ -64,7 +64,7 @@ const ProductCatalogue = () => {
 
         <Card>
           <CardContent className="p-5">
-            <div className="text-sm text-gray-700 font-semibold text-muted-foreground">Total products added</div>
+            <div className="text-sm text-gray-700 text-muted-foreground mb-1">Total products added</div>
             <div className="flex items-center gap-1">
               <img src="/hexagon.png" className="w-7 h-7" />
               <span className="text-2xl font-bold pb-1">{data.total_count}</span>
@@ -78,7 +78,7 @@ const ProductCatalogue = () => {
           <CardContent className="p-5">
             <div className="flex">
               <div className="w-1/2">
-                <div className="text-sm text-gray-700 font-semibold text-muted-foreground mb-2">Enter Product Name</div>
+                <div className="text-sm text-gray-700 text-muted-foreground mb-2">Enter Product Name</div>
                 <div className="space-y-3">
                   <Input
                     type="text"
@@ -100,8 +100,8 @@ const ProductCatalogue = () => {
       </div>
 
       {/* Added Products Section */}
-      <Card>
-        <CardHeader>
+      <Card className="p-6">
+        <CardHeader className="p-0 mb-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-6">
               <CardTitle className="text-lg font-semibold ">Products</CardTitle>
@@ -112,11 +112,11 @@ const ProductCatalogue = () => {
                     placeholder="Search product by name"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pr-10 h-7"
+                    className="w-full pr-10 h-8"
                   />
                 </div>
                 <button
-                  className="absolute right-0 h-7 w-10 flex rounded-r-md justify-center items-center bg-gray-300"
+                  className="absolute right-0 h-8 w-10 flex rounded-r-md justify-center items-center bg-gray-300"
                   onClick={() => handleFilters()}>
                   <Search className="h-4 w-4 text-muted-foreground" />
                 </button>
@@ -129,7 +129,7 @@ const ProductCatalogue = () => {
               {/* Sort and Status */}
               <div className="flex gap-2">
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-40 h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -146,7 +146,7 @@ const ProductCatalogue = () => {
                     setStatus(val);
                     handleFilters(val === "All" ? "" : val);
                   }}>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="w-32 h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -176,11 +176,11 @@ const ProductCatalogue = () => {
               {products.length > 0 ? (
                 products.map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium pl-5">#{item.id}</TableCell>
-                    <TableCell>{item.product_name}</TableCell>
-                    <TableCell>{item.qr_fingerprints_count}</TableCell>
-                    <TableCell>{item.created_at}</TableCell>
-                    <TableCell>
+                    <TableCell className="font-medium pl-5 py-4">#{item.id}</TableCell>
+                    <TableCell className="py-4">{item.product_name}</TableCell>
+                    <TableCell className="py-4">{item.qr_fingerprints_count}</TableCell>
+                    <TableCell className="py-4">{item.created_at}</TableCell>
+                    <TableCell className="py-4">
                       <Button
                         variant="link"
                         className="text-blue-700 hover:text-green-700 p-0 h-auto"

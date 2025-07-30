@@ -76,11 +76,11 @@ const QRGenerator = () => {
 
         <Card>
           <CardContent className="p-5">
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground mb-1">
               Total QRs <br /> generated
             </div>
             <div className="flex items-center gap-1">
-              <img src="/qricon.png" className="w-7 h-7" />
+              <img src="/total-scans.png" className="w-7 h-7" />
               <span className="text-2xl font-bold pb-1">{totalQR}</span>
             </div>
           </CardContent>
@@ -90,9 +90,9 @@ const QRGenerator = () => {
 
         <Card>
           <CardContent className="p-5">
-            <div className="text-sm text-muted-foreground">Total QR generation limit for your plan</div>
+            <div className="text-sm text-muted-foreground mb-1">Total QR generation limit for your plan</div>
             <div className="flex items-center gap-1">
-              <img src="/qricon.png" className="w-7 h-7" />
+              <img src="/total-scans.png" className="w-7 h-7" />
               <span className="text-2xl font-bold pb-1">19,000</span>
             </div>
           </CardContent>
@@ -108,7 +108,7 @@ const QRGenerator = () => {
                 Buy credits
               </span>
             </div>
-            <div className="text-xs text-muted-foreground">(1 credit = 1 QR generation)</div>
+            <div className="text-xs text-muted-foreground mb-2">(1 credit = 1 QR generation)</div>
             <div className="flex items-center gap-1">
               <img src="/dollar.png" className="w-7 h-7" />
               <span className="text-2xl font-bold pb-1">1691</span>
@@ -159,8 +159,8 @@ const QRGenerator = () => {
       </div>
 
       {/* Generated QRs Section */}
-      <Card>
-        <CardHeader>
+      <Card className="p-6">
+        <CardHeader className="p-0 mb-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-6">
               <CardTitle className="text-lg font-semibold ">Generated QRs</CardTitle>
@@ -172,10 +172,10 @@ const QRGenerator = () => {
                     placeholder="Search QR by Serial or Product Name"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pr-10"
+                    className="w-full pr-10 h-8"
                   />
                 </div>
-                <button className="absolute right-0 h-9 w-10 flex rounded-r-md justify-center items-center bg-gray-300">
+                <button className="absolute right-0 h-8 w-10 flex rounded-r-md justify-center items-center bg-gray-300">
                   <Search className="h-4 w-4 text-muted-foreground" onClick={() => handleFilters()} />
                 </button>
               </div>
@@ -190,7 +190,7 @@ const QRGenerator = () => {
                     setSortBy(val);
                     handleFilters({ sort: val });
                   }}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-40 h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -207,7 +207,7 @@ const QRGenerator = () => {
                     setStatus(val);
                     handleFilters({ statusArg: val === "All" ? "" : val });
                   }}>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="w-32 h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -227,8 +227,9 @@ const QRGenerator = () => {
           {/* Table */}
           <Table>
             <TableHeader>
-              <TableRow className="bg-green-50">
+              <TableRow className="bg-gray-100">
                 <TableHead className="pl-4">QR Serial No.</TableHead>
+                <TableHead>Figerprint Id</TableHead>
                 <TableHead>Linked Product</TableHead>
                 <TableHead>Linked Printer</TableHead>
                 <TableHead>Date created</TableHead>
@@ -239,11 +240,12 @@ const QRGenerator = () => {
               {qrData.length > 0 ? (
                 qrData.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="font-medium pl-5">#{item.serial_number}</TableCell>
-                    <TableCell>{item.product_name ?? "-"}</TableCell>
-                    <TableCell>{item.printer_name}</TableCell>
-                    <TableCell>{item.created_at}</TableCell>
-                    <TableCell>
+                    <TableCell className="font-medium pl-5 py-4">#{item.serial_number}</TableCell>
+                    <TableCell className="py-4">{item.fingerprint_id}</TableCell>
+                    <TableCell className="py-4">{item.product_name ?? "-"}</TableCell>
+                    <TableCell className="py-4">{item.printer_name}</TableCell>
+                    <TableCell className="py-4">{item.created_at}</TableCell>
+                    <TableCell className="py-4">
                       <Button
                         variant="link"
                         className="text-green-600 hover:text-green-700 p-0 h-auto"
