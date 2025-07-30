@@ -184,7 +184,7 @@ const ProductCatalogue = () => {
                       <Button
                         variant="link"
                         className="text-blue-700 hover:text-green-700 p-0 h-auto"
-                        onClick={() => navigate(`/product-catalogue/${item.id}`)}>
+                        onClick={() => navigate(`/product-catalogue/${item.id}/${item.product_name}`)}>
                         View details
                       </Button>
                     </TableCell>

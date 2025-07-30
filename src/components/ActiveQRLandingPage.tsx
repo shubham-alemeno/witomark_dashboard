@@ -71,8 +71,8 @@ const ActiveQRLandingPage: React.FC<Props> = (props) => {
           <div className="flex justify-center">
             <Button
               className="mt-3 w-45 h-9 flex justify-center items-center gap-2 text-xs bg-[#02bc5f] 
-                        text-white rounded-full hover:bg-green-600 transition-colors">
-              <img src="/camera.png" alt="camera" width="15" height="15" />
+                        text-white rounded-full hover:bg-green-600 transition-colors pb-2.5">
+              <img src="/camera.png" alt="camera" width="15" height="15" className="mt-0.5" />
               Scan QR Fingerprint
             </Button>
           </div>

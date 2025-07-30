@@ -104,7 +104,7 @@ const QRCodeDetails = () => {
       <Card className="rounded-md min-h-full">
         <CardContent className="flex min-h-full p-0 justify-between">
           {/* Left Section - QR Details */}
-          <div className="relative pt-1 w-full">
+          <div className="relative pt-2 px-4 w-full">
             <Table className="w-full table-auto text-left text-sm text-gray-700">
               <TableBody className="text-black">
                 <TableRow className="border-b hover:bg-transparent">
@@ -220,7 +220,7 @@ const QRCodeDetails = () => {
               </TableBody>
             </Table>
 
-            <div className="absolute bottom-0 w-full flex justify-between p-6">
+            <div className="absolute bottom-0 w-full flex justify-between p-6 pr-10 pl-4">
               <ConfirmDialog
                 message={`Are you sure you want to delete this QR fingerprint`}
                 onConfirm={handleDelete}

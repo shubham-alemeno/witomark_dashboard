@@ -39,7 +39,7 @@ const App = () => (
           <Route path="qr-generator" element={<QRGenerator />} />
           <Route path="qr-generator/:qrId" element={<QRCodeDetails />} />
           <Route path="product-catalogue" element={<ProductCatalogue />} />
-          <Route path="product-catalogue/:productId" element={<ProductDetails />} />
+          <Route path="product-catalogue/:productId/:pname" element={<ProductDetails />} />
           <Route path="printers" element={<Printers />} />
           <Route path="plan-details" element={<PlanDetails />} />
           <Route path="alerts" element={<Alerts />} />

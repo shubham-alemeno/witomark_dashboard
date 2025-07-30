@@ -87,7 +87,7 @@ const ProductDetails = () => {
       <Card className="rounded-md min-h-full">
         <CardContent className="flex min-h-full p-0">
           {/* Left Section - Form */}
-          <div className="relative w-3/5 pt-1">
+          <div className="relative w-3/5 pt-2 px-4">
             <Table className="w-full table-auto text-left text-sm text-gray-700">
               <TableBody className="text-black">
                 <TableRow className="border-b hover:bg-transparent">
@@ -178,7 +178,7 @@ const ProductDetails = () => {
               </TableBody>
             </Table>
 
-            <div className="absolute bottom-0 w-full flex justify-between items-center p-6">
+            <div className="absolute bottom-0 w-full flex justify-between items-center p-6 pr-10">
               <ConfirmDialog
                 message={`Are you sure you want to delete ${productName}`}
                 onConfirm={handleDelete}
@@ -198,16 +198,18 @@ const ProductDetails = () => {
           {/* Right Section - Webpage Preview */}
           <div className="w-2/5 bg-[#2c3fcc] px-20 pb-8 pt-5 rounded-r-md">
             <div className="text-white text-sm py-2 text-center">Webpage preview</div>
-            <div className="bg-white text-center h-[480px] mx-6">
+            <div className="bg-gray-100 text-center h-[450px] mx-6">
               <div className="w-full flex justify-center items-center py-3">
                 <img src="/witomark-logo.png" alt="Logo" width={100} height={30} className="mx-auto rounded-md" />
               </div>
-              <div>
-                <h1 className="font-semibold text-sm text-left px-3 line-clamp-1">{productName}</h1>
-                <p className="text-xs text-left px-3 line-clamp-3 mb-2">{productDescription}</p>
-                {imagePreview ? (
-                  <img src={imagePreview} alt="Product" className="w-full object-cover h-[155px]" />
-                ) : null}
+              <div className="bg-white border-t-2">
+                <div>
+                  <h1 className="font-semibold text-sm text-left px-3 line-clamp-1">{productName}</h1>
+                  <p className="text-xs text-left px-3 line-clamp-3 mb-2">{productDescription}</p>
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Product" className="w-full object-cover h-[135px]" />
+                  ) : null}
+                </div>
               </div>
               <div className="mt-4 px-4 flex items-center justify-center gap-2 text-sm text-gray-700">
                 <img src="/witomark-qr.jpg" alt="QR Code" width={50} height={50} />
@@ -215,7 +217,8 @@ const ProductDetails = () => {
                   Scan the QR Fingerprint and verify whether the product is genuine or not
                 </span>
               </div>
-              <Button className="mt-4 bg-green-600 hover:bg-green-700 text-white rounded-full">
+              <Button className="mt-4 bg-[#02bc5f] hover:bg-green-600 text-white rounded-full text-xs pb-2.5">
+                <img src="/camera.png" alt="camera" width="15" height="15" className="mt-0.5" />
                 Scan QR Fingerprint
               </Button>
             </div>

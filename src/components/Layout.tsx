@@ -24,6 +24,14 @@ const Layout = () => {
       const scanId = location.pathname.split("/").pop();
       return `Scan #${scanId}`;
     }
+    if (location.pathname.startsWith("/product-catalogue/")) {
+      const params = location.pathname.split("/");
+      return `Product: ${params[3]} #${params[2]}`;
+    }
+    if (location.pathname.startsWith("/qr-generator/")) {
+      const qrId = location.pathname.split("/").pop();
+      return `QR #${qrId}`;
+    }
     return pageTitles[location.pathname] || "Dashboard";
   };
 
