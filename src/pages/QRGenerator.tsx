@@ -196,8 +196,8 @@ const QRGenerator = () => {
                   <SelectContent>
                     <SelectItem value="newest">Sort by: Latest first</SelectItem>
                     <SelectItem value="oldest">Sort by: Oldest first</SelectItem>
-                    <SelectItem value="a-z">Sort by: Name A-Z</SelectItem>
-                    <SelectItem value="z-a">Sort by: Name Z-A</SelectItem>
+                    {/* <SelectItem value="a-z">Sort by: Name A-Z</SelectItem>
+                    <SelectItem value="z-a">Sort by: Name Z-A</SelectItem> */}
                   </SelectContent>
                 </Select>
 
