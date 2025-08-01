@@ -12,6 +12,7 @@ import { deleteQR, downloadQR, getAllProductsQuery, getQR, updateQR } from "@/li
 import ActiveQRLandingPage from "@/components/ActiveQRLandingPage";
 import InActiveQRLandingPage from "@/components/InActiveQRLandingPage";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { toast } from "sonner";
 
 interface LinkedProduct {
   id?: number;
@@ -46,9 +47,15 @@ const QRCodeDetails = () => {
       setLoading(true);
       await updateQR(params.qrId, { status, product: linkedProduct.id });
       await refetch();
-      alert("Saved changes successfully");
+      toast.success("QR detials updated successfully", {
+        position: "top-right",
+        style: { color: "rgba(0, 210, 0)", border: "2px solid rgba(0, 210, 0, 0.5)" }
+      });
     } catch (error) {
-      alert(`Error: ${error}`);
+      toast.error("Error occured while saving", {
+        position: "top-right",
+        style: { color: "rgba(255, 0, 0)", border: "2px solid rgba(255, 0, 0, 0.5)" }
+      });
     } finally {
       setLoading(false);
     }
@@ -92,8 +99,15 @@ const QRCodeDetails = () => {
     try {
       await deleteQR(params.qrId);
       navigate(-1);
+      toast.success("QR deleted successfully", {
+        position: "top-right",
+        style: { color: "rgba(0, 210, 0)", border: "2px solid rgba(0, 210, 0, 0.5)" }
+      });
     } catch (error) {
-      alert(error);
+      toast.error("Error occured while deleting", {
+        position: "top-right",
+        style: { color: "rgba(255, 0, 0)", border: "2px solid rgba(255, 0, 0, 0.5)" }
+      });
     }
   };
 

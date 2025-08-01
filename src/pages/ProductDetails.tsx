@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { Fingerprint } from "@/lib/api/types";
+import { toast } from "sonner";
 
 const ProductDetails = () => {
   const params = useParams();
@@ -63,9 +64,15 @@ const ProductDetails = () => {
         product_image: imageFile,
         status
       });
-      alert("Product details updated successfully");
+      toast.success("Product detials updated successfully", {
+        position: "top-right",
+        style: { color: "rgba(0, 210, 0)", border: "2px solid rgba(0, 210, 0, 0.5)" }
+      });
     } catch (error) {
-      alert(error);
+      toast.error("Error occured while saving", {
+        position: "top-right",
+        style: { color: "rgba(255, 0, 0)", border: "2px solid rgba(255, 0, 0, 0.5)" }
+      });
     } finally {
       setLoading(false);
     }
@@ -74,9 +81,16 @@ const ProductDetails = () => {
   const handleDelete = async () => {
     try {
       await deleteProduct(params.productId);
+      toast.success("Product deleted successfully", {
+        position: "top-right",
+        style: { color: "rgba(0, 210, 0)", border: "2px solid rgba(0, 210, 0, 0.5)" }
+      });
       navigate(-1);
     } catch (error) {
-      alert(error);
+      toast.error("Error occured while deleting", {
+        position: "top-right",
+        style: { color: "rgba(255, 0, 0)", border: "2px solid rgba(255, 0, 0, 0.5)" }
+      });
     }
   };
 
