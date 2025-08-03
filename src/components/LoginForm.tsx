@@ -29,15 +29,14 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       const res = await loginUser({ username, password });
       localStorage.setItem("access", res.access);
       localStorage.setItem("refresh", res.refresh);
-      // Optionally store user_data too
+
       localStorage.setItem("user", JSON.stringify(res.user_data));
       navigate("/dashboard");
     } catch (err) {
       console.error("Login error:", err);
-      // Extract detailed error message from API response
+
       let errorMessage = "Login failed. Please check your credentials.";
 
-      // Check if it's an axios error with response data
       if (err && typeof err === "object" && "response" in err) {
         const axiosError = err as { response?: { data?: { detail?: string; message?: string } } };
         if (axiosError.response?.data?.detail) {

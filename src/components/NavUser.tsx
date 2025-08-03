@@ -28,7 +28,8 @@ export function NavUser({
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("sentinel_dash_token");
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
     navigate("/login");
   };
 
