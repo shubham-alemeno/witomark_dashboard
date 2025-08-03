@@ -11,16 +11,28 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { Fingerprint } from "@/lib/api/types";
 import { toast } from "sonner";
 
+interface ProductData {
+  productName: string;
+  productDescription: string;
+  imageFile: File | null;
+  imagePreview: string | null;
+  linkedQRs: Fingerprint[];
+  status: string;
+}
+
 const ProductDetails = () => {
   const params = useParams();
 
-  const [productName, setProductName] = useState("");
-  const [productDescription, setProductDescription] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [linkedQRs, setLinkedQRs] = useState<Fingerprint[]>([]);
+  const [productData, setProductData] = useState<ProductData>({
+    productName: "",
+    productDescription: "",
+    imageFile: null,
+    imagePreview: null,
+    linkedQRs: [],
+    status: ""
+  });
+
   const [loading, setLoading] = useState<boolean>(false);
-  const [status, setStatus] = useState<string>("");
 
   const navigate = useNavigate();
 
@@ -29,11 +41,14 @@ const ProductDetails = () => {
       setLoading(true);
       const response = await getProduct(params.productId);
       console.log(response.qr_fingerprints);
-      setProductName(response.product_name);
-      setProductDescription(response.product_description);
-      setImagePreview(response.product_image);
-      setStatus(response.status);
-      setLinkedQRs(response.qr_fingerprints);
+      setProductData({
+        productName: response.product_name,
+        productDescription: response.product_description,
+        imageFile: null,
+        imagePreview: response.product_image,
+        linkedQRs: response.qr_fingerprints,
+        status: response.status
+      });
       setLoading(false);
     })();
   }, []);
@@ -41,28 +56,34 @@ const ProductDetails = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      setProductData((prev) => ({
+        ...prev,
+        imageFile: file,
+        imagePreview: URL.createObjectURL(file)
+      }));
     }
   };
 
   const removeImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
+    setProductData((prev) => ({
+      ...prev,
+      imageFile: null,
+      imagePreview: null
+    }));
   };
 
   const handleSave = async () => {
     try {
       setLoading(true);
-      if (productName === "") {
+      if (productData.productName === "") {
         console.log("Product Name cannot be empty");
         return;
       }
-      const response = await updateProduct(params.productId, {
-        product_name: productName,
-        product_description: productDescription,
-        product_image: imageFile,
-        status
+      await updateProduct(params.productId, {
+        product_name: productData.productName,
+        product_description: productData.productDescription,
+        product_image: productData.imageFile,
+        status: productData.status
       });
       toast.success("Product detials updated successfully", {
         position: "top-right",
@@ -113,8 +134,8 @@ const ProductDetails = () => {
                   <TableCell className="px-4 py-2">
                     <input
                       type="text"
-                      value={productName}
-                      onChange={(e) => setProductName(e.target.value)}
+                      value={productData.productName}
+                      onChange={(e) => setProductData((prev) => ({ ...prev, productName: e.target.value }))}
                       className="w-full border px-2 py-1 rounded text-sm"
                     />
                   </TableCell>
@@ -124,8 +145,8 @@ const ProductDetails = () => {
                   <TableCell className="px-4 py-2">
                     <textarea
                       rows={3}
-                      value={productDescription ?? ""}
-                      onChange={(e) => setProductDescription(e.target.value)}
+                      value={productData.productDescription ?? ""}
+                      onChange={(e) => setProductData((prev) => ({ ...prev, productDescription: e.target.value }))}
                       className="w-full border px-2 py-1 rounded text-sm"
                     />
                   </TableCell>
@@ -133,11 +154,11 @@ const ProductDetails = () => {
                 <TableRow className="border-b align-top hover:bg-transparent">
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Product Image:</TableCell>
                   <TableCell className="px-4 py-2 space-y-2">
-                    {imageFile ? (
+                    {productData.imagePreview ? (
                       <div className="space-y-1">
                         <div className="flex items-center gap-3 text-sm">
-                          <span>{imageFile.name.substring(0, 20) + "..."}</span>
-                          <p>|</p>
+                          {productData.imageFile && <span>{productData.imageFile.name.substring(0, 20) + "..."}</span>}
+                          {productData.imageFile && <p>|</p>}
                           <label className="text-blue-600 cursor-pointer hover:underline">
                             Change Image
                             <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
@@ -148,7 +169,7 @@ const ProductDetails = () => {
                           </button>
                         </div>
                         <div>
-                          <img src={imagePreview ?? ""} alt="Preview" className="max-h-32 rounded border" />
+                          <img src={productData.imagePreview ?? ""} alt="Preview" className="max-h-32 rounded border" />
                         </div>
                       </div>
                     ) : (
@@ -164,7 +185,9 @@ const ProductDetails = () => {
                 <TableRow className="border-b hover:bg-transparent">
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Status:</TableCell>
                   <TableCell className="px-4 py-2 font-semibold">
-                    <Select value={status} onValueChange={setStatus}>
+                    <Select
+                      value={productData.status}
+                      onValueChange={(val) => setProductData((prev) => ({ ...prev, status: val }))}>
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
@@ -179,8 +202,8 @@ const ProductDetails = () => {
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Linked QR Serial:</TableCell>
                   <TableCell className="px-4 py-2 font-semibold">
                     {"["}{" "}
-                    {linkedQRs.map((qr, index) =>
-                      linkedQRs.length === index + 1 ? (
+                    {productData.linkedQRs.map((qr, index) =>
+                      productData.linkedQRs.length === index + 1 ? (
                         <span key={qr.serial_number}>#{qr.serial_number}</span>
                       ) : (
                         <span key={qr.serial_number}>#{qr.serial_number}, </span>
@@ -194,7 +217,7 @@ const ProductDetails = () => {
 
             <div className="absolute bottom-0 w-full flex justify-between items-center p-6 pr-10">
               <ConfirmDialog
-                message={`Are you sure you want to delete ${productName}`}
+                message={`Are you sure you want to delete ${productData.productName}`}
                 onConfirm={handleDelete}
                 trigger={(open) => (
                   <div className="bg-red-200 p-2 rounded-sm hover:cursor-pointer hover:bg-red-300" onClick={open}>
@@ -218,10 +241,10 @@ const ProductDetails = () => {
               </div>
               <div className="bg-white border-t-2">
                 <div>
-                  <h1 className="font-semibold text-sm text-left px-3 line-clamp-1">{productName}</h1>
-                  <p className="text-xs text-left px-3 line-clamp-3 mb-2">{productDescription}</p>
-                  {imagePreview ? (
-                    <img src={imagePreview} alt="Product" className="w-full object-cover h-[135px]" />
+                  <h1 className="font-semibold text-sm text-left px-3 line-clamp-1">{productData.productName}</h1>
+                  <p className="text-xs text-left px-3 line-clamp-3 mb-2">{productData.productDescription}</p>
+                  {productData.imagePreview ? (
+                    <img src={productData.imagePreview} alt="Product" className="w-full object-cover h-[135px]" />
                   ) : null}
                 </div>
               </div>
