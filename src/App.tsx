@@ -1,6 +1,6 @@
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, RouterProvider } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import ProtectedRoute from "./ProtectedRoute";
@@ -18,11 +18,12 @@ import ProductDetails from "./pages/ProductDetails";
 import BulkQRDownloader from "./pages/BulkQRDownloader";
 import BulkQREditor from "./pages/BulkQREditor";
 import ScanPage from "./pages/ScanPage";
+import router from "./lib/routes";
 
 const App = () => (
   <TooltipProvider>
     <Sonner />
-    <BrowserRouter>
+    {/* <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
@@ -32,7 +33,6 @@ const App = () => (
               <Layout />
             </ProtectedRoute>
           }>
-          {/* Nested routes within the layout */}
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="dashboard/scan/:scanId" element={<ScanPage />} />
@@ -46,7 +46,8 @@ const App = () => (
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </BrowserRouter>
+    </BrowserRouter> */}
+    <RouterProvider router={router} />
   </TooltipProvider>
 );
 

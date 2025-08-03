@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useNavigate, useParams } from "react-router-dom";
+import { useBlocker, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ProductApiResponse, ProductsFilter, QRDetailsResponse } from "@/lib/api/types";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
@@ -34,6 +34,33 @@ const QRCodeDetails = () => {
   const [status, setStatus] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [linkedProduct, setLinkedProduct] = useState<LinkedProduct>({});
+  const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
+
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) => unsavedChanges && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      const confirmLeave = window.confirm("You have unsaved changes. Are you sure you want to leave?");
+      if (confirmLeave) {
+        blocker.proceed();
+      } else {
+        blocker.reset();
+      }
+    }
+  }, [blocker, blocker.state]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (unsavedChanges) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [unsavedChanges]);
 
   useEffect(() => {
     if (!loadingQr) {
@@ -51,6 +78,7 @@ const QRCodeDetails = () => {
         position: "top-right",
         style: { color: "rgba(0, 210, 0)", border: "2px solid rgba(0, 210, 0, 0.5)" }
       });
+      setUnsavedChanges(false);
     } catch (error) {
       toast.error("Error occured while saving", {
         position: "top-right",
@@ -98,11 +126,12 @@ const QRCodeDetails = () => {
   const handleDelete = async () => {
     try {
       await deleteQR(params.qrId);
-      navigate(-1);
       toast.success("QR deleted successfully", {
         position: "top-right",
         style: { color: "rgba(0, 210, 0)", border: "2px solid rgba(0, 210, 0, 0.5)" }
       });
+      setUnsavedChanges(false);
+      navigate(-1);
     } catch (error) {
       toast.error("Error occured while deleting", {
         position: "top-right",
@@ -194,6 +223,7 @@ const QRCodeDetails = () => {
                     <Select
                       value={linkedProduct?.id?.toString() ?? ""}
                       onValueChange={(id) => {
+                        setUnsavedChanges(true);
                         setLinkedProduct(products.results.find((p) => p.id === parseInt(id)));
                       }}>
                       <SelectTrigger className="w-32 border-none shadow-none h-5 relative hover:border-none focus:outline-none focus:ring-0 [&>svg]:hidden">
@@ -217,6 +247,7 @@ const QRCodeDetails = () => {
                     <Select
                       value={status}
                       onValueChange={(val) => {
+                        setUnsavedChanges(true);
                         setStatus(val);
                       }}>
                       <SelectTrigger className="w-32 border-none shadow-none h-5 relative hover:border-none focus:outline-none focus:ring-0 [&>svg]:hidden">
@@ -244,7 +275,10 @@ const QRCodeDetails = () => {
                   </div>
                 )}
               />
-              <Button className="bg-green-600 hover:bg-green-700 px-8 py-5" onClick={handleSave}>
+              <Button
+                className="bg-green-600 hover:bg-green-700 px-8 py-5"
+                onClick={handleSave}
+                disabled={!unsavedChanges}>
                 Save Details
               </Button>
             </div>

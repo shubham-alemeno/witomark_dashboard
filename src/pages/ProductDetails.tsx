@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { Fingerprint } from "@/lib/api/types";
 import { toast } from "sonner";
+import { useBlocker } from "react-router-dom";
 
 interface ProductData {
   productName: string;
@@ -32,9 +33,35 @@ const ProductDetails = () => {
     status: ""
   });
 
+  const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) => unsavedChanges && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      const confirmLeave = window.confirm("You have unsaved changes. Are you sure you want to leave?");
+      if (confirmLeave) {
+        blocker.proceed();
+      } else {
+        blocker.reset();
+      }
+    }
+  }, [blocker, blocker.state]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (unsavedChanges) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [unsavedChanges]);
 
   useEffect(() => {
     (async () => {
@@ -54,6 +81,7 @@ const ProductDetails = () => {
   }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUnsavedChanges(true);
     const file = e.target.files?.[0];
     if (file) {
       setProductData((prev) => ({
@@ -65,6 +93,7 @@ const ProductDetails = () => {
   };
 
   const removeImage = () => {
+    setUnsavedChanges(true);
     setProductData((prev) => ({
       ...prev,
       imageFile: null,
@@ -89,6 +118,7 @@ const ProductDetails = () => {
         position: "top-right",
         style: { color: "rgba(0, 210, 0)", border: "2px solid rgba(0, 210, 0, 0.5)" }
       });
+      setUnsavedChanges(false);
     } catch (error) {
       toast.error("Error occured while saving", {
         position: "top-right",
@@ -106,6 +136,7 @@ const ProductDetails = () => {
         position: "top-right",
         style: { color: "rgba(0, 210, 0)", border: "2px solid rgba(0, 210, 0, 0.5)" }
       });
+      setUnsavedChanges(false);
       navigate(-1);
     } catch (error) {
       toast.error("Error occured while deleting", {
@@ -135,7 +166,10 @@ const ProductDetails = () => {
                     <input
                       type="text"
                       value={productData.productName}
-                      onChange={(e) => setProductData((prev) => ({ ...prev, productName: e.target.value }))}
+                      onChange={(e) => {
+                        setUnsavedChanges(true);
+                        setProductData((prev) => ({ ...prev, productName: e.target.value }));
+                      }}
                       className="w-full border px-2 py-1 rounded text-sm"
                     />
                   </TableCell>
@@ -146,7 +180,10 @@ const ProductDetails = () => {
                     <textarea
                       rows={3}
                       value={productData.productDescription ?? ""}
-                      onChange={(e) => setProductData((prev) => ({ ...prev, productDescription: e.target.value }))}
+                      onChange={(e) => {
+                        setUnsavedChanges(true);
+                        setProductData((prev) => ({ ...prev, productDescription: e.target.value }));
+                      }}
                       className="w-full border px-2 py-1 rounded text-sm"
                     />
                   </TableCell>
@@ -187,7 +224,10 @@ const ProductDetails = () => {
                   <TableCell className="px-4 py-2 font-semibold">
                     <Select
                       value={productData.status}
-                      onValueChange={(val) => setProductData((prev) => ({ ...prev, status: val }))}>
+                      onValueChange={(val) => {
+                        setUnsavedChanges(true);
+                        setProductData((prev) => ({ ...prev, status: val }));
+                      }}>
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
@@ -226,7 +266,10 @@ const ProductDetails = () => {
                 )}
               />
 
-              <Button className="bg-[#2c3fcc] hover:bg-green-700 px-8 py-5" onClick={handleSave}>
+              <Button
+                className="bg-[#2c3fcc] hover:bg-blue-600 px-8 py-5"
+                onClick={handleSave}
+                disabled={!unsavedChanges}>
                 Save Details
               </Button>
             </div>
