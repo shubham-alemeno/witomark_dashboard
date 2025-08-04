@@ -26,7 +26,8 @@ const Layout = () => {
     }
     if (location.pathname.startsWith("/product-catalogue/")) {
       const params = location.pathname.split("/");
-      return `Product: ${params[3]} #${params[2]}`;
+      const productName = decodeURIComponent(params[3]);
+      return `Product: ${productName} #${params[2]}`;
     }
     if (location.pathname.startsWith("/qr-generator/")) {
       const params = location.pathname.split("/");
