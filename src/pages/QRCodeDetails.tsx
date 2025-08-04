@@ -13,6 +13,8 @@ import ActiveQRLandingPage from "@/components/ActiveQRLandingPage";
 import InActiveQRLandingPage from "@/components/InActiveQRLandingPage";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { toast } from "sonner";
+import Loader from "@/components/Loader";
+import { errorToast, successToast } from "@/lib/utils";
 
 interface LinkedProduct {
   id?: number;
@@ -23,7 +25,6 @@ interface LinkedProduct {
 
 const QRCodeDetails = () => {
   const params = useParams();
-  const navigate = useNavigate();
 
   const { data: products, isLoading: loadingProducts } = useAxios<ProductApiResponse, ProductsFilter>(
     getAllProductsQuery,
@@ -74,15 +75,15 @@ const QRCodeDetails = () => {
       setLoading(true);
       await updateQR(params.qrId, { status, product: linkedProduct.id });
       await refetch();
-      toast.success("QR detials updated successfully", {
+      toast.success("QR details updated successfully", {
         position: "top-right",
-        style: { color: "rgba(0, 210, 0)", border: "2px solid rgba(0, 210, 0, 0.5)" }
+        style: successToast
       });
       setUnsavedChanges(false);
     } catch (error) {
       toast.error("Error occured while saving", {
         position: "top-right",
-        style: { color: "rgba(255, 0, 0)", border: "2px solid rgba(255, 0, 0, 0.5)" }
+        style: errorToast
       });
     } finally {
       setLoading(false);
@@ -119,28 +120,12 @@ const QRCodeDetails = () => {
     } catch (error) {
       alert(`Error: ${error}`);
     } finally {
+      await refetch();
       setLoading(false);
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      await deleteQR(params.qrId);
-      toast.success("QR deleted successfully", {
-        position: "top-right",
-        style: { color: "rgba(0, 210, 0)", border: "2px solid rgba(0, 210, 0, 0.5)" }
-      });
-      setUnsavedChanges(false);
-      navigate(-1);
-    } catch (error) {
-      toast.error("Error occured while deleting", {
-        position: "top-right",
-        style: { color: "rgba(255, 0, 0)", border: "2px solid rgba(255, 0, 0, 0.5)" }
-      });
-    }
-  };
-
-  if (loadingQr || loadingProducts || loading) return <div>Loading...</div>;
+  if (loadingQr || loadingProducts || loading) return <Loader />;
 
   return (
     <div className="p-4">
@@ -160,7 +145,9 @@ const QRCodeDetails = () => {
                 </TableRow>
                 <TableRow className="border-b hover:bg-transparent">
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Date created:</TableCell>
-                  <TableCell className="px-4 py-2 font-semibold">{qrData.created_at}</TableCell>
+                  <TableCell className="px-4 py-2 font-semibold">
+                    {new Date(qrData.created_at).toLocaleString()}
+                  </TableCell>
                 </TableRow>
                 <TableRow className="border-b hover:bg-transparent">
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Linked Printer:</TableCell>
@@ -218,7 +205,9 @@ const QRCodeDetails = () => {
                 <TableRow className="border-b hover:bg-transparent">
                   <TableCell className="px-4 py-2 font-semibold text-gray-600">Linked Product:</TableCell>
                   <TableCell className="px-4 py-2 flex">
-                    <span className="font-medium font-semibold">{linkedProduct?.product_name ?? ""}</span>
+                    <span className="font-medium font-semibold">
+                      {linkedProduct?.product_name ?? "No product linked"}
+                    </span>
                     <span className="ml-3 font-semibold">|</span>
                     <Select
                       value={linkedProduct?.id?.toString() ?? ""}
@@ -265,16 +254,7 @@ const QRCodeDetails = () => {
               </TableBody>
             </Table>
 
-            <div className="absolute bottom-0 w-full flex justify-between p-6 pr-10 pl-4">
-              <ConfirmDialog
-                message={`Are you sure you want to delete this QR fingerprint`}
-                onConfirm={handleDelete}
-                trigger={(open) => (
-                  <div className="bg-red-200 p-2 rounded-sm hover:cursor-pointer hover:bg-red-300" onClick={open}>
-                    <img src="/delete.png" alt="Delete" className="mx-auto rounded-md w-7 h-7" />
-                  </div>
-                )}
-              />
+            <div className="absolute bottom-0 w-full flex justify-end p-6 pr-10 pl-4">
               <Button
                 className="bg-green-600 hover:bg-green-700 px-8 py-5"
                 onClick={handleSave}

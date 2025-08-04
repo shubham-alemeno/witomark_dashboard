@@ -10,9 +10,12 @@ import { useNavigate } from "react-router-dom";
 import { useAxios } from "@/hooks/useAxios";
 import { createProduct, getAllProducts, getAllProductsQuery } from "@/lib/api/methods";
 import { Product } from "@/lib/api/types";
+import Loader from "@/components/Loader";
+import { errorToast, successToast } from "@/lib/utils";
+import { toast } from "sonner";
 
 const ProductCatalogue = () => {
-  const { data, isLoading, error } = useAxios(getAllProducts);
+  const { data, isLoading, refetch } = useAxios(getAllProducts);
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [productName, setProductName] = useState<string>("");
@@ -32,10 +35,21 @@ const ProductCatalogue = () => {
 
   const handleCreateProduct = async () => {
     try {
+      setLoading(true);
       await createProduct({ product_name: productName });
-      alert("Product Created Successfully");
+      toast.success("Product created successfully", {
+        position: "top-right",
+        style: successToast
+      });
     } catch (error) {
-      alert(error);
+      const nameError: boolean = error?.response?.data?.product_name?.length > 0 ? true : false;
+      toast.error(nameError ? "Error: Product Name cannot be empty" : "Error occured while creating product", {
+        position: "top-right",
+        style: errorToast
+      });
+    } finally {
+      await refetch();
+      setLoading(false);
     }
   };
 
@@ -48,13 +62,16 @@ const ProductCatalogue = () => {
       });
       setProducts(response.results);
     } catch (error) {
-      alert(error);
+      toast.error("Error occured while filtering products", {
+        position: "top-right",
+        style: errorToast
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading || isLoading) return <div>Loading...</div>;
+  if (loading || isLoading) return <Loader />;
 
   return (
     <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
@@ -179,7 +196,7 @@ const ProductCatalogue = () => {
                     <TableCell className="font-medium pl-5 py-4">#{item.id}</TableCell>
                     <TableCell className="py-4">{item.product_name}</TableCell>
                     <TableCell className="py-4">{item.qr_fingerprints_count}</TableCell>
-                    <TableCell className="py-4">{item.created_at}</TableCell>
+                    <TableCell className="py-4">{new Date(item.created_at).toLocaleString()}</TableCell>
                     <TableCell className="py-4">
                       <Button
                         variant="link"

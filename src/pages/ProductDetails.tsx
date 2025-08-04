@@ -11,6 +11,8 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { Fingerprint } from "@/lib/api/types";
 import { toast } from "sonner";
 import { useBlocker } from "react-router-dom";
+import Loader from "@/components/Loader";
+import { errorToast, successToast } from "@/lib/utils";
 
 interface ProductData {
   productName: string;
@@ -114,15 +116,15 @@ const ProductDetails = () => {
         product_image: productData.imageFile,
         status: productData.status
       });
-      toast.success("Product detials updated successfully", {
+      toast.success("Product details updated successfully", {
         position: "top-right",
-        style: { color: "rgba(0, 210, 0)", border: "2px solid rgba(0, 210, 0, 0.5)" }
+        style: successToast
       });
       setUnsavedChanges(false);
     } catch (error) {
       toast.error("Error occured while saving", {
         position: "top-right",
-        style: { color: "rgba(255, 0, 0)", border: "2px solid rgba(255, 0, 0, 0.5)" }
+        style: errorToast
       });
     } finally {
       setLoading(false);
@@ -134,19 +136,19 @@ const ProductDetails = () => {
       await deleteProduct(params.productId);
       toast.success("Product deleted successfully", {
         position: "top-right",
-        style: { color: "rgba(0, 210, 0)", border: "2px solid rgba(0, 210, 0, 0.5)" }
+        style: successToast
       });
       setUnsavedChanges(false);
       navigate(-1);
     } catch (error) {
       toast.error("Error occured while deleting", {
         position: "top-right",
-        style: { color: "rgba(255, 0, 0)", border: "2px solid rgba(255, 0, 0, 0.5)" }
+        style: errorToast
       });
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loader />;
 
   return (
     <div className="p-4">

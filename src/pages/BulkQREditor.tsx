@@ -1,5 +1,4 @@
-import { useState, useMemo } from "react";
-import { qrData } from "@/data/mockQRData";
+import { useState, useMemo, useEffect } from "react";
 import { Save, Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -7,14 +6,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAxios } from "@/hooks/useAxios";
+import { listQR } from "@/lib/api/methods";
+import { Fingerprint } from "@/lib/api/types";
 
 const BulkQREditor = () => {
+  const { data, isLoading: loadingQRs } = useAxios(listQR);
+
+  const [qrData, setQrData] = useState<Fingerprint[]>([]);
   const [sortBy, setSortBy] = useState("latest");
   const [status, setStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [editedData, setEditedData] = useState<Record<string, { linkedProduct: string; status: string }>>({});
 
-  const handleFieldChange = (id: string, field: "linkedProduct" | "status", value: string) => {
+  useEffect(() => {
+    if (!loadingQRs) {
+      setQrData(data.results);
+    }
+  }, [data]);
+
+  const handleFieldChange = (id: number, field: "linkedProduct" | "status", value: string) => {
     setEditedData((prev) => ({
       ...prev,
       [id]: {
@@ -23,42 +34,6 @@ const BulkQREditor = () => {
       }
     }));
   };
-
-  const filteredAndSortedData = useMemo(() => {
-    let filtered = qrData;
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (item) =>
-          item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.linkedProduct.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Filter by status
-    if (status !== "all") {
-      filtered = filtered.filter((item) => item.status === status);
-    }
-
-    // Sort data
-    const sorted = [...filtered].sort((a, b) => {
-      switch (sortBy) {
-        case "latest":
-          return new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime();
-        case "oldest":
-          return new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime();
-        case "name-asc":
-          return a.linkedProduct.localeCompare(b.linkedProduct);
-        case "name-desc":
-          return b.linkedProduct.localeCompare(a.linkedProduct);
-        default:
-          return 0;
-      }
-    });
-
-    return sorted;
-  }, [searchTerm, status, sortBy]);
 
   const handleChanges = () => {
     console.log("Submitting changes:", editedData);
@@ -145,29 +120,29 @@ const BulkQREditor = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAndSortedData.length > 0 ? (
-                filteredAndSortedData.map((item, index) => (
+              {qrData.length > 0 ? (
+                qrData.map((item, index) => (
                   <TableRow key={index}>
                     <TableCell className="font-medium pl-5">#{item.id}</TableCell>
                     <TableCell>
                       <Select
-                        value={editedData[item.id]?.linkedProduct ?? item.linkedProduct}
+                        value={editedData[item.id]?.linkedProduct ?? item.product_name}
                         onValueChange={(value) => handleFieldChange(item.id, "linkedProduct", value)}>
                         <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Select product" />
                         </SelectTrigger>
                         <SelectContent>
                           {qrData.map((qrItem) => (
-                            <SelectItem key={qrItem.id} value={qrItem.linkedProduct}>
-                              {qrItem.linkedProduct}
+                            <SelectItem key={qrItem.id} value={qrItem.product_name}>
+                              {qrItem.product_name}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </TableCell>
 
-                    <TableCell>{item.linkedPrinter}</TableCell>
-                    <TableCell>{item.dateCreated}</TableCell>
+                    <TableCell>{item.printer_name}</TableCell>
+                    <TableCell>{item.created_at}</TableCell>
                     <TableCell>
                       <Select
                         value={editedData[item.id]?.status ?? item.status}

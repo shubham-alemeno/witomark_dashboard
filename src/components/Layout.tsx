@@ -29,8 +29,8 @@ const Layout = () => {
       return `Product: ${params[3]} #${params[2]}`;
     }
     if (location.pathname.startsWith("/qr-generator/")) {
-      const qrId = location.pathname.split("/").pop();
-      return `QR #${qrId}`;
+      const params = location.pathname.split("/");
+      return `QR #${params[3]}`;
     }
     return pageTitles[location.pathname] || "Dashboard";
   };

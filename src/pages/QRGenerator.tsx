@@ -5,14 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-// import { qrData } from "@/data/mockQRData";
 import { useNavigate } from "react-router-dom";
 import { useAxios } from "@/hooks/useAxios";
 import { createQR, getAllPrinters, listQR, listQRQuery } from "@/lib/api/methods";
 import { Fingerprint } from "@/lib/api/types";
+import { toast } from "sonner";
+import Loader from "@/components/Loader";
+import { successToast, errorToast } from "@/lib/utils";
 
 const QRGenerator = () => {
-  const { data, isLoading: loadingQRs } = useAxios(listQR);
+  const { data, isLoading: loadingQRs, refetch } = useAxios(listQR);
   const { data: printers, isLoading: loadingPrinters } = useAxios(getAllPrinters);
 
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -35,10 +37,21 @@ const QRGenerator = () => {
 
   const handleGenerateQR = async () => {
     try {
+      setLoading(true);
       const response = await createQR({ count: qrCount, printer: parseInt(selectedPrinter) });
-      alert(response.data.message ?? "Success");
+      toast.success(response.data?.message ?? "Generated QRs successfully", {
+        position: "top-right",
+        style: successToast
+      });
     } catch (error) {
-      alert(error);
+      const printerError: boolean = error?.response?.data?.printer?.length > 0 ? true : false;
+      toast.error(printerError ? "No printer selected" : "Error occured while generating QRs", {
+        position: "top-right",
+        style: errorToast
+      });
+    } finally {
+      await refetch();
+      setLoading(false);
     }
   };
 
@@ -66,7 +79,7 @@ const QRGenerator = () => {
     }
   };
 
-  if (loadingPrinters || loadingQRs || loading) return <div>Loading...</div>;
+  if (loadingPrinters || loadingQRs || loading) return <Loader />;
 
   return (
     <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
@@ -100,7 +113,7 @@ const QRGenerator = () => {
 
         {/* Credit Balance */}
 
-        <Card>
+        {/* <Card>
           <CardContent className="p-5">
             <div className="text-[13px] text-muted-foreground">
               Credit balance |{" "}
@@ -114,7 +127,7 @@ const QRGenerator = () => {
               <span className="text-2xl font-bold pb-1">1691</span>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Generate QRs */}
 
@@ -127,8 +140,14 @@ const QRGenerator = () => {
                   <div className="flex gap-2">
                     <Input
                       type="number"
+                      min={0}
+                      max={100}
                       value={qrCount}
-                      onChange={(e) => setQrCount(parseInt(e.target.value))}
+                      onChange={(e) => {
+                        const raw = parseInt(e.target.value || "0");
+                        const clamped = Math.max(0, Math.min(100, raw));
+                        setQrCount(clamped);
+                      }}
                       placeholder="6"
                       className="flex-1 h-7"
                     />
@@ -166,10 +185,10 @@ const QRGenerator = () => {
               <CardTitle className="text-lg font-semibold ">Generated QRs</CardTitle>
               {/* Search */}
               <div className="flex items-center relative">
-                <div className="w-[300px]">
+                <div className="w-[345px]">
                   <Input
                     type="text"
-                    placeholder="Search QR by Serial or Product Name"
+                    placeholder="Search QR by Fingerprint Id or Linked Product"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pr-10 h-8"
@@ -244,12 +263,12 @@ const QRGenerator = () => {
                     <TableCell className="py-4">{item.fingerprint_id}</TableCell>
                     <TableCell className="py-4">{item.product_name ?? "-"}</TableCell>
                     <TableCell className="py-4">{item.printer_name}</TableCell>
-                    <TableCell className="py-4">{item.created_at}</TableCell>
+                    <TableCell className="py-4">{new Date(item.created_at).toLocaleString()}</TableCell>
                     <TableCell className="py-4">
                       <Button
                         variant="link"
                         className="text-green-600 hover:text-green-700 p-0 h-auto"
-                        onClick={() => navigate(`/qr-generator/${item.id}`)}>
+                        onClick={() => navigate(`/qr-generator/${item.id}/${item.fingerprint_id}`)}>
                         View details
                       </Button>
                     </TableCell>

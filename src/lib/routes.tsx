@@ -14,6 +14,8 @@ import ScanPage from "@/pages/ScanPage";
 import ProtectedRoute from "@/ProtectedRoute";
 import Layout from "@/components/Layout";
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import BulkQRDownloader from "@/pages/BulkQRDownloader";
+import BulkQREditor from "@/pages/BulkQREditor";
 
 const router = createBrowserRouter([
   {
@@ -32,7 +34,7 @@ const router = createBrowserRouter([
       { path: "dashboard", element: <Dashboard /> },
       { path: "dashboard/scan/:scanId", element: <ScanPage /> },
       { path: "qr-generator", element: <QRGenerator /> },
-      { path: "qr-generator/:qrId", element: <QRCodeDetails /> },
+      { path: "qr-generator/:qrId/:fId", element: <QRCodeDetails /> },
       { path: "product-catalogue", element: <ProductCatalogue /> },
       { path: "product-catalogue/:productId/:pname", element: <ProductDetails /> },
       { path: "printers", element: <Printers /> },
