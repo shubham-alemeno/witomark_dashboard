@@ -28,7 +28,6 @@ const ProductCatalogue = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      console.log("Data set");
       setProducts(data.results);
     }
   }, [data]);
@@ -193,7 +192,7 @@ const ProductCatalogue = () => {
               {products.length > 0 ? (
                 products.map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium pl-5 py-4">#{item.id}</TableCell>
+                    <TableCell className="font-medium pl-5 py-4">#{item.product_id}</TableCell>
                     <TableCell className="py-4">{item.product_name}</TableCell>
                     <TableCell className="py-4">{item.qr_fingerprints_count}</TableCell>
                     <TableCell className="py-4">{new Date(item.created_at).toLocaleString()}</TableCell>
@@ -201,7 +200,7 @@ const ProductCatalogue = () => {
                       <Button
                         variant="link"
                         className="text-blue-700 hover:text-green-700 p-0 h-auto"
-                        onClick={() => navigate(`/product-catalogue/${item.id}/${item.product_name}`)}>
+                        onClick={() => navigate(`/product-catalogue/${item.product_id}/${item.product_name}`)}>
                         View details
                       </Button>
                     </TableCell>

@@ -30,7 +30,7 @@ const QRCodeDetails = () => {
     getAllProductsQuery,
     { status: "Active", search: "" }
   );
-  const { data: qrData, isLoading: loadingQr, refetch } = useAxios<QRDetailsResponse, string>(getQR, params.qrId);
+  const { data: qrData, isLoading: loadingQr, refetch } = useAxios<QRDetailsResponse, string>(getQR, params.fId);
 
   const [status, setStatus] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -73,7 +73,7 @@ const QRCodeDetails = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
-      await updateQR(params.qrId, { status, product: linkedProduct.id });
+      await updateQR(qrData.id.toString(), { status, product: linkedProduct.id });
       await refetch();
       toast.success("QR details updated successfully", {
         position: "top-right",

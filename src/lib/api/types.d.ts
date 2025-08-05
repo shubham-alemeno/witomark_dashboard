@@ -87,6 +87,7 @@ export interface MapScansResponse {
 
 export interface Product {
   id: number;
+  product_id: string;
   company_name: string;
   product_name: string;
   product_sku: string;
@@ -118,6 +119,7 @@ export interface ProductResponse {
   company: number;
   company_name: string;
   company_code: string;
+  product_id: string;
   product_name: string;
   product_image: string;
   product_image_preview: string;
@@ -170,6 +172,7 @@ export interface Fingerprint {
 
 export interface ListQRResponse {
   total_count: number;
+  qr_generation_limit: number;
   current_count: number;
   next: string | null;
   previous: string | null;

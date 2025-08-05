@@ -31,7 +31,7 @@ const Layout = () => {
     }
     if (location.pathname.startsWith("/qr-generator/")) {
       const params = location.pathname.split("/");
-      return `QR #${params[3]}`;
+      return `QR #${params[2]}`;
     }
     return pageTitles[location.pathname] || "Dashboard";
   };

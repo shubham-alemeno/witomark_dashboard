@@ -30,6 +30,7 @@ const QRGenerator = () => {
 
   useEffect(() => {
     if (!loadingQRs) {
+      console.log(data);
       setQrData(data.results);
       setTotalQR(data.total_count);
     }
@@ -106,7 +107,7 @@ const QRGenerator = () => {
             <div className="text-sm text-muted-foreground mb-1">Total QR generation limit for your plan</div>
             <div className="flex items-center gap-1">
               <img src="/total-scans.png" className="w-7 h-7" />
-              <span className="text-2xl font-bold pb-1">19,000</span>
+              <span className="text-2xl font-bold pb-1">{data.qr_generation_limit}</span>
             </div>
           </CardContent>
         </Card>
@@ -145,7 +146,7 @@ const QRGenerator = () => {
                       value={qrCount}
                       onChange={(e) => {
                         const raw = parseInt(e.target.value || "0");
-                        const clamped = Math.max(0, Math.min(100, raw));
+                        const clamped = Math.max(0, Math.min(data.qr_generation_limit - data.total_count, raw));
                         setQrCount(clamped);
                       }}
                       placeholder="6"
@@ -268,7 +269,7 @@ const QRGenerator = () => {
                       <Button
                         variant="link"
                         className="text-green-600 hover:text-green-700 p-0 h-auto"
-                        onClick={() => navigate(`/qr-generator/${item.id}/${item.fingerprint_id}`)}>
+                        onClick={() => navigate(`/qr-generator/${item.fingerprint_id}`)}>
                         View details
                       </Button>
                     </TableCell>

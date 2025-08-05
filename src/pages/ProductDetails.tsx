@@ -15,6 +15,7 @@ import Loader from "@/components/Loader";
 import { errorToast, successToast } from "@/lib/utils";
 
 interface ProductData {
+  id: number;
   productName: string;
   productDescription: string;
   imageFile: File | null;
@@ -27,6 +28,7 @@ const ProductDetails = () => {
   const params = useParams();
 
   const [productData, setProductData] = useState<ProductData>({
+    id: 0,
     productName: "",
     productDescription: "",
     imageFile: null,
@@ -71,6 +73,7 @@ const ProductDetails = () => {
       const response = await getProduct(params.productId);
       console.log(response.qr_fingerprints);
       setProductData({
+        id: response.id,
         productName: response.product_name,
         productDescription: response.product_description,
         imageFile: null,
@@ -286,8 +289,8 @@ const ProductDetails = () => {
               </div>
               <div className="bg-white border-t-2">
                 <div>
-                  <h1 className="font-semibold text-sm text-left px-3 line-clamp-1">{productData.productName}</h1>
-                  <p className="text-xs text-left px-3 line-clamp-3 mb-2">{productData.productDescription}</p>
+                  <h1 className="font-semibold text-sm text-left px-3 pt-1 line-clamp-1">{productData.productName}</h1>
+                  <p className="text-xs text-left px-3 py-1 line-clamp-3 mb-2">{productData.productDescription}</p>
                   {productData.imagePreview ? (
                     <img src={productData.imagePreview} alt="Product" className="w-full object-cover h-[135px]" />
                   ) : null}
