@@ -66,19 +66,19 @@ const data = {
       url: "/printers",
       icon: Printer,
       items: []
-    },
-    {
-      title: "Plan Details",
-      url: "/plan-details",
-      icon: DollarSign,
-      items: []
-    },
-    {
-      title: "Alerts",
-      url: "/alerts",
-      icon: AlertCircle,
-      items: []
     }
+    // {
+    //   title: "Plan Details",
+    //   url: "/plan-details",
+    //   icon: DollarSign,
+    //   items: []
+    // },
+    // {
+    //   title: "Alerts",
+    //   url: "/alerts",
+    //   icon: AlertCircle,
+    //   items: []
+    // }
   ]
 };
 

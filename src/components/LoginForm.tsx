@@ -59,7 +59,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       <Card>
         <CardHeader className="text-center">
           <div className="flex justify-center">
-            <img src="/witomark-logo.png" alt="Witomark Logo" className="h-12" />
+            <img src="/fasiculus-logo.png" alt="Fasiculus Logo" className="h-12" />
           </div>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>Enter your credentials below to login to your account</CardDescription>

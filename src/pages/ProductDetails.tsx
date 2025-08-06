@@ -285,7 +285,7 @@ const ProductDetails = () => {
             <div className="text-white text-sm py-2 text-center">Webpage preview</div>
             <div className="bg-gray-100 text-center h-[450px] mx-6">
               <div className="w-full flex justify-center items-center py-3">
-                <img src="/witomark-logo.png" alt="Logo" width={100} height={30} className="mx-auto rounded-md" />
+                <img src="/fasiculus-logo.png" alt="Logo" width={100} height={30} className="mx-auto rounded-md" />
               </div>
               <div className="bg-white border-t-2">
                 <div>

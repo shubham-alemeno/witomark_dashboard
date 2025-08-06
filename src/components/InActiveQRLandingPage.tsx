@@ -8,7 +8,7 @@ const InActiveQRLandingPage: React.FC<Props> = ({ status }) => {
   return (
     <div className="text-black">
       <div className="w-full flex items-center justify-center p-2">
-        <img src="/witomark-logo.png" alt="sentinel-logo" width={100} height={100} />
+        <img src="/fasiculus-logo.png" alt="fasiculus-logo" width={100} height={100} />
       </div>
       <div className="w-full bg-[#f3efc9] p-2 border-y-2 border-y-gray-300">
         {status === "Archived" ? (

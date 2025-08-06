@@ -13,7 +13,7 @@ const ActiveQRLandingPage: React.FC<Props> = (props) => {
     <div className="bg-gray-100 w-full text-black">
       <div className="flex flex-col w-full">
         <div className="w-full flex items-center justify-center p-2">
-          <img src="/witomark-logo.png" alt="sentinel-logo" width={100} height={100} />
+          <img src="/fasiculus-logo.png" alt="fasiculus-logo" width={100} height={100} />
         </div>
 
         {/* Left side - Image */}

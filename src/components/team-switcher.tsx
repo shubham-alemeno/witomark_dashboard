@@ -40,21 +40,17 @@ export function TeamSwitcher({
             }`}>
             <div className="flex items-center relative overflow-hidden">
               <img
-                src="/witomark-logo.png"
-                alt="Witomark Logo"
+                src="/fasiculus-logo.png"
+                alt="Fasiculus Logo"
                 className={`h-8 transition-all duration-300 ease-in-out ${
-                  state === "expanded"
-                    ? "opacity-100 scale-100 translate-x-0"
-                    : "opacity-0 scale-95 -translate-x-2"
+                  state === "expanded" ? "opacity-100 scale-100 translate-x-0" : "opacity-0 scale-95 -translate-x-2"
                 }`}
               />
               <img
-                src="/witomark-favicon.png"
-                alt="Witomark Icon"
+                src="/fasiculus-favicon.png"
+                alt="Fasiculus Icon"
                 className={`h-7 w-7 ml-0.5 absolute transition-all duration-300 ease-in-out ${
-                  state === "expanded"
-                    ? "opacity-0 scale-95 translate-x-2"
-                    : "opacity-100 scale-100 translate-x-0"
+                  state === "expanded" ? "opacity-0 scale-95 translate-x-2" : "opacity-100 scale-100 translate-x-0"
                 }`}
               />
             </div>
