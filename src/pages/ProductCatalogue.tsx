@@ -37,7 +37,7 @@ const ProductCatalogue = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalCount, setTotalCount] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const pageSize = 10;
+  const pageSize = 30;
 
   const navigate = useNavigate();
 
