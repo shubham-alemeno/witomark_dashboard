@@ -20,7 +20,7 @@ const onRefreshed = (newAccessToken: string) => {
 };
 
 export const apiClient = axios.create({
-  baseURL: "https://api.witomark.com/",
+  baseURL: "https://fasiculus-api.witomark.com/",
   timeout: 120000,
   withCredentials: true
 });
