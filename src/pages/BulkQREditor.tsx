@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import { Save, Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -6,24 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAxios } from "@/hooks/useAxios";
-import { listQR } from "@/lib/api/methods";
+import { listQRs } from "@/lib/api/methods";
 import { Fingerprint } from "@/lib/api/types";
 
 const BulkQREditor = () => {
-  const { data, isLoading: loadingQRs } = useAxios(listQR);
-
   const [qrData, setQrData] = useState<Fingerprint[]>([]);
   const [sortBy, setSortBy] = useState("latest");
   const [status, setStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [editedData, setEditedData] = useState<Record<string, { linkedProduct: string; status: string }>>({});
-
-  useEffect(() => {
-    if (!loadingQRs) {
-      setQrData(data.results);
-    }
-  }, [data]);
 
   const handleFieldChange = (id: number, field: "linkedProduct" | "status", value: string) => {
     setEditedData((prev) => ({

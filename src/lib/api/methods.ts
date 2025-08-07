@@ -7,13 +7,10 @@ import {
   MapScansResponse,
   CreateProductRequest,
   ProductApiResponse,
-  ProductsFilter,
   ProductResponse,
   UpdateProductRequest,
-  QRFilters,
   BulkQRCreateRequest,
   ListQRResponse,
-  Fingerprint,
   QRDetailsResponse,
   UpdateQRRequest
 } from "./types";
@@ -104,23 +101,6 @@ export const listProducts = async (
 ): Promise<ProductApiResponse> => {
   const response = await apiClient.get(
     `/api/products/products/?page_size=${page_size}&page=${page}&status=${status}&search=${search}&sort=${sort}&all=${all}`
-  );
-  return response.data;
-};
-
-export const getAllProducts = async (args: { all: boolean }, page = 1, limit = 10): Promise<ProductApiResponse> => {
-  const response = await apiClient.get(`/api/products/products/?all=${args.all}`);
-  return response.data;
-};
-
-export const getAllProductsPaginated = async (url: string): Promise<ProductApiResponse> => {
-  const response = await apiClient.get(url);
-  return response.data;
-};
-
-export const getAllProductsQuery = async (args?: ProductsFilter, page = 1, limit = 10): Promise<ProductApiResponse> => {
-  const response = await apiClient.get(
-    `/api/products/products/?status=${args.status}&search=${args.search}&sort=${args.sort}&all=${args.all}`
   );
   return response.data;
 };

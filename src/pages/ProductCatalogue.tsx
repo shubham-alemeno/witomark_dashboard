@@ -20,7 +20,6 @@ import {
   PaginationEllipsis,
   PaginationNext
 } from "@/components/ui/pagination";
-import { qrData } from "@/data/mockQRData";
 
 const ProductCatalogue = () => {
   const [productName, setProductName] = useState<string>("");
@@ -51,7 +50,6 @@ const ProductCatalogue = () => {
         search: searchTerm,
         sort: sortBy
       });
-      console.log("Real...", response);
       setProducts(response.results);
       setTotalProducts(response.total_count);
       setTotalCount(response.count);

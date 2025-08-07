@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -60,7 +60,6 @@ const QRGenerator = () => {
         search: searchTerm,
         sort: sortBy
       });
-      console.log("Real...", response);
       setQrData(response.results);
       setTotalQR(response.total_count);
       setQrGenerationLimit(response.qr_generation_limit);

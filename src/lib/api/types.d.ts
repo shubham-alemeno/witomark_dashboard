@@ -152,12 +152,6 @@ export interface BulkQRCreateRequest {
   count: number;
 }
 
-export interface QRFilters {
-  search?: string;
-  sort?: string;
-  status?: string;
-}
-
 export interface Fingerprint {
   id: number;
   fingerprint_id: string;
