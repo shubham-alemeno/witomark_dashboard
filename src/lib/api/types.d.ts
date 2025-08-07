@@ -108,6 +108,7 @@ export interface ProductsFilter {
   status?: string;
   sort?: string;
   search?: string;
+  all?: boolean;
 }
 
 export interface CreateProductRequest {
@@ -151,12 +152,6 @@ export interface BulkQRCreateRequest {
   count: number;
 }
 
-export interface QRFilters {
-  search?: string;
-  sort?: string;
-  status?: string;
-}
-
 export interface Fingerprint {
   id: number;
   fingerprint_id: string;
@@ -174,6 +169,9 @@ export interface ListQRResponse {
   total_count: number;
   qr_generation_limit: number;
   current_count: number;
+  count: number;
+  page: number;
+  page_size: number;
   next: string | null;
   previous: string | null;
   results: Fingerprint[];

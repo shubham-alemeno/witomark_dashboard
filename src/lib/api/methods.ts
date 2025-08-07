@@ -7,13 +7,10 @@ import {
   MapScansResponse,
   CreateProductRequest,
   ProductApiResponse,
-  ProductsFilter,
   ProductResponse,
   UpdateProductRequest,
-  QRFilters,
   BulkQRCreateRequest,
   ListQRResponse,
-  Fingerprint,
   QRDetailsResponse,
   UpdateQRRequest
 } from "./types";
@@ -85,13 +82,26 @@ export const getAllPrinters = async (page = 1, limit = 10): Promise<PrinterApiRe
   return response.data;
 };
 
-export const getAllProducts = async (page = 1, limit = 10): Promise<ProductApiResponse> => {
-  const response = await apiClient.get(`/api/products/products/?page=${page}`);
-  return response.data;
-};
-
-export const getAllProductsQuery = async (args?: ProductsFilter, page = 1, limit = 10): Promise<ProductApiResponse> => {
-  const response = await apiClient.get(`/api/products/products/?status=${args.status}&search=${args.search}`);
+export const listProducts = async (
+  {
+    page,
+    page_size,
+    status,
+    search,
+    sort,
+    all
+  }: {
+    page?: number;
+    page_size?: number;
+    status?: string;
+    search?: string;
+    sort?: string;
+    all?: boolean;
+  } = { status: "", search: "", sort: "" }
+): Promise<ProductApiResponse> => {
+  const response = await apiClient.get(
+    `/api/products/products/?page_size=${page_size}&page=${page}&status=${status}&search=${search}&sort=${sort}&all=${all}`
+  );
   return response.data;
 };
 
@@ -140,15 +150,25 @@ export const getQR = async (id: string): Promise<QRDetailsResponse> => {
   return response.data;
 };
 
-export const listQR = async (page = 1, limit = 10): Promise<ListQRResponse> => {
-  const response = await apiClient.get(`/api/fingerprints/qr_fingerprints/?&all=true`);
-  return response.data;
-};
-
-export const listQRQuery = async (args?: QRFilters, page = 1, limit = 10): Promise<ListQRResponse> => {
-  const { search, sort, status } = args;
+export const listQRs = async (
+  {
+    page,
+    page_size,
+    status,
+    search,
+    sort,
+    all
+  }: {
+    page?: number;
+    page_size?: number;
+    status?: string;
+    search?: string;
+    sort?: string;
+    all?: boolean;
+  } = { status: "", search: "", sort: "" }
+): Promise<ListQRResponse> => {
   const response = await apiClient.get(
-    `/api/fingerprints/qr_fingerprints/?search=${search}&sort=${sort}&status=${status}`
+    `/api/fingerprints/qr_fingerprints/?page_size=${page_size}&page=${page}&status=${status}&search=${search}&sort=${sort}&all=${all}`
   );
   return response.data;
 };
@@ -163,8 +183,4 @@ export const downloadQR = async (id: string, format: string) => {
     `/api/fingerprints/download-fingerprint/?fingerprint_id=${id}&file_format=${format}`
   );
   return response.data;
-};
-
-export const deleteQR = async (id: string) => {
-  await apiClient.delete(`/api/fingerprints/qr_fingerprints/${id}/`);
 };
