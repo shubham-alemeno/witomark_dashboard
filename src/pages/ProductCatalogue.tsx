@@ -5,17 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { qrData } from "@/data/mockQRData";
 import { useNavigate } from "react-router-dom";
 import { useAxios } from "@/hooks/useAxios";
-import { createProduct, getAllProducts, getAllProductsQuery } from "@/lib/api/methods";
-import { Product } from "@/lib/api/types";
+import { createProduct, getAllProducts, getAllProductsPaginated, getAllProductsQuery } from "@/lib/api/methods";
+import { Product, ProductApiResponse } from "@/lib/api/types";
 import Loader from "@/components/Loader";
 import { errorToast, successToast } from "@/lib/utils";
 import { toast } from "sonner";
 
 const ProductCatalogue = () => {
-  const { data, isLoading, refetch } = useAxios(getAllProducts);
+  const { data, isLoading, refetch } = useAxios(getAllProducts, { all: false });
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [productName, setProductName] = useState<string>("");
@@ -23,12 +22,17 @@ const ProductCatalogue = () => {
   const [status, setStatus] = useState<string>("All");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [prev, setPrev] = useState<string | null>(null);
+  const [next, setNext] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLoading) {
+      console.log(data);
       setProducts(data.results);
+      setNext(data.next);
+      setPrev(data.previous);
     }
   }, [data]);
 
@@ -60,6 +64,9 @@ const ProductCatalogue = () => {
         search: searchArg ?? searchTerm
       });
       setProducts(response.results);
+      setNext(response.next);
+      setPrev(response.previous);
+      console.log(response);
     } catch (error) {
       toast.error("Error occured while filtering products", {
         position: "top-right",
@@ -67,6 +74,46 @@ const ProductCatalogue = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNext = async () => {
+    if (next) {
+      try {
+        setLoading(true);
+        const response = await getAllProductsPaginated(next);
+        setProducts(response.results);
+        setNext(response.next);
+        setPrev(response.previous);
+        console.log(response);
+      } catch (error) {
+        toast.error("Error occured while fetching QRs", {
+          position: "top-right",
+          style: errorToast
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handlePrev = async () => {
+    if (prev) {
+      try {
+        setLoading(true);
+        const response = await getAllProductsPaginated(prev);
+        setProducts(response.results);
+        setNext(response.next);
+        setPrev(response.previous);
+        console.log(response);
+      } catch (error) {
+        toast.error("Error occured while fetching QRs", {
+          position: "top-right",
+          style: errorToast
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -215,6 +262,24 @@ const ProductCatalogue = () => {
               )}
             </TableBody>
           </Table>
+          {(prev || next) && (
+            <div className="w-full flex justify-center mt-6">
+              <div className="flex gap-4">
+                <Button
+                  className="px-4 py-2 text-sm text-grat-700 bg-transparent rounded-md border border-2 hover:bg-gray-100"
+                  disabled={prev === null}
+                  onClick={handlePrev}>
+                  Back
+                </Button>
+                <Button
+                  className="px-4 py-2 text-sm text-gray-700 bg-transparent rounded-md border border-2 hover:bg-gray-100"
+                  disabled={next === null}
+                  onClick={handleNext}>
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

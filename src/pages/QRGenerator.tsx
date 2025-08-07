@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
 import { useAxios } from "@/hooks/useAxios";
-import { createQR, getAllPrinters, listQR, listQRQuery } from "@/lib/api/methods";
+import { createQR, getAllPrinters, listQR, listQRPaginated, listQRQuery } from "@/lib/api/methods";
 import { Fingerprint } from "@/lib/api/types";
 import { toast } from "sonner";
 import Loader from "@/components/Loader";
@@ -25,6 +25,8 @@ const QRGenerator = () => {
   const [qrData, setQrData] = useState<Fingerprint[]>([]);
   const [totalQR, setTotalQR] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [prev, setPrev] = useState<string | null>(null);
+  const [next, setNext] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
@@ -32,11 +34,27 @@ const QRGenerator = () => {
     if (!loadingQRs) {
       console.log(data);
       setQrData(data.results);
+      setNext(data.next);
+      setPrev(data.previous);
       setTotalQR(data.total_count);
     }
   }, [data]);
 
   const handleGenerateQR = async () => {
+    if (qrCount > data.qr_generation_limit - data.total_count) {
+      toast.error("Cannot generate QRs more than the QR generation limit", {
+        position: "top-right",
+        style: errorToast
+      });
+      return;
+    }
+    if (qrCount > 100) {
+      toast.error("Cannot generate more than 100 QRs at a time", {
+        position: "top-right",
+        style: errorToast
+      });
+      return;
+    }
     try {
       setLoading(true);
       const response = await createQR({ count: qrCount, printer: parseInt(selectedPrinter) });
@@ -73,10 +91,53 @@ const QRGenerator = () => {
         status: statusArg ?? (status === "All" ? "" : status)
       });
       setQrData(response.results);
+      setNext(response.next);
+      setPrev(response.previous);
     } catch (error) {
-      alert(error);
+      toast.error("Error occured while fetching QRs with selected filters", {
+        position: "top-right",
+        style: errorToast
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNext = async () => {
+    if (next) {
+      try {
+        setLoading(true);
+        const response = await listQRPaginated(next);
+        setQrData(response.results);
+        setNext(response.next);
+        setPrev(response.previous);
+      } catch (error) {
+        toast.error("Error occured while fetching QRs", {
+          position: "top-right",
+          style: errorToast
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handlePrev = async () => {
+    if (prev) {
+      try {
+        setLoading(true);
+        const response = await listQRPaginated(prev);
+        setQrData(response.results);
+        setNext(response.next);
+        setPrev(response.previous);
+      } catch (error) {
+        toast.error("Error occured while fetching QRs", {
+          position: "top-right",
+          style: errorToast
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -142,12 +203,9 @@ const QRGenerator = () => {
                     <Input
                       type="number"
                       min={0}
-                      max={100}
                       value={qrCount}
                       onChange={(e) => {
-                        const raw = parseInt(e.target.value || "0");
-                        const clamped = Math.max(0, Math.min(data.qr_generation_limit - data.total_count, raw));
-                        setQrCount(clamped);
+                        setQrCount(parseInt(e.target.value || "0"));
                       }}
                       placeholder="6"
                       className="flex-1 h-7"
@@ -284,6 +342,24 @@ const QRGenerator = () => {
               )}
             </TableBody>
           </Table>
+          {(prev || next) && (
+            <div className="w-full flex justify-center mt-6">
+              <div className="flex gap-4">
+                <Button
+                  className="px-4 py-2 text-sm text-grat-700 bg-transparent rounded-md border border-2 hover:bg-gray-100"
+                  disabled={prev === null}
+                  onClick={handlePrev}>
+                  Back
+                </Button>
+                <Button
+                  className="px-4 py-2 text-sm text-gray-700 bg-transparent rounded-md border border-2 hover:bg-gray-100"
+                  disabled={next === null}
+                  onClick={handleNext}>
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

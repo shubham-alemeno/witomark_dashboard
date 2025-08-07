@@ -85,8 +85,13 @@ export const getAllPrinters = async (page = 1, limit = 10): Promise<PrinterApiRe
   return response.data;
 };
 
-export const getAllProducts = async (page = 1, limit = 10): Promise<ProductApiResponse> => {
-  const response = await apiClient.get(`/api/products/products/?page=${page}`);
+export const getAllProducts = async (args: { all: boolean }, page = 1, limit = 10): Promise<ProductApiResponse> => {
+  const response = await apiClient.get(`/api/products/products/?all=${args.all}`);
+  return response.data;
+};
+
+export const getAllProductsPaginated = async (url: string): Promise<ProductApiResponse> => {
+  const response = await apiClient.get(url);
   return response.data;
 };
 
@@ -141,7 +146,12 @@ export const getQR = async (id: string): Promise<QRDetailsResponse> => {
 };
 
 export const listQR = async (page = 1, limit = 10): Promise<ListQRResponse> => {
-  const response = await apiClient.get(`/api/fingerprints/qr_fingerprints/?&all=true`);
+  const response = await apiClient.get(`/api/fingerprints/qr_fingerprints/`);
+  return response.data;
+};
+
+export const listQRPaginated = async (url: string): Promise<ListQRResponse> => {
+  const response = await apiClient.get(url);
   return response.data;
 };
 
