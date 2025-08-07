@@ -7,40 +7,75 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
 import { useAxios } from "@/hooks/useAxios";
-import { createQR, getAllPrinters, listQR, listQRPaginated, listQRQuery } from "@/lib/api/methods";
+import { createQR, getAllPrinters, listQRs } from "@/lib/api/methods";
 import { Fingerprint } from "@/lib/api/types";
 import { toast } from "sonner";
 import Loader from "@/components/Loader";
 import { successToast, errorToast } from "@/lib/utils";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from "@/components/ui/pagination";
 
 const QRGenerator = () => {
-  const { data, isLoading: loadingQRs, refetch } = useAxios(listQR);
   const { data: printers, isLoading: loadingPrinters } = useAxios(getAllPrinters);
 
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  // Input Field
   const [qrCount, setQrCount] = useState<number>(0);
+
+  // Data
+  const [qrData, setQrData] = useState<Fingerprint[]>([]);
   const [selectedPrinter, setSelectedPrinter] = useState("");
+  const [qrGenerationLimit, setQrGenerationLimit] = useState<number>(0);
+
+  // Filters
   const [sortBy, setSortBy] = useState("newest");
   const [status, setStatus] = useState("All");
-  const [qrData, setQrData] = useState<Fingerprint[]>([]);
   const [totalQR, setTotalQR] = useState<number>(0);
+  const [search, setSearch] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalCount, setTotalCount] = useState<number>(1);
+  const pageSize = 30;
+
   const [loading, setLoading] = useState<boolean>(false);
-  const [prev, setPrev] = useState<string | null>(null);
-  const [next, setNext] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loadingQRs) {
-      setQrData(data.results);
-      setNext(data.next);
-      setPrev(data.previous);
-      setTotalQR(data.total_count);
-    }
-  }, [data]);
+    (async () => {
+      setLoading(true);
+      const response = await listQRs({
+        page: currentPage,
+        page_size: pageSize,
+        status: status === "All" ? "" : status,
+        search: searchTerm,
+        sort: sortBy
+      });
+      console.log("Real...", response);
+      setQrData(response.results);
+      setTotalQR(response.total_count);
+      setQrGenerationLimit(response.qr_generation_limit);
+      setTotalCount(response.count);
+      setTotalPages(Math.ceil(response.count / pageSize));
+      setLoading(false);
+    })();
+  }, [status, search, sortBy, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [status, sortBy]);
 
   const handleGenerateQR = async () => {
-    if (qrCount > data.qr_generation_limit - data.total_count) {
+    if (qrCount > qrGenerationLimit - totalQR) {
       toast.error("Cannot generate QRs more than the QR generation limit", {
         position: "top-right",
         style: errorToast
@@ -68,79 +103,13 @@ const QRGenerator = () => {
         style: errorToast
       });
     } finally {
-      await refetch();
+      //reload by changing the state of trigger
+      setSearch((prev) => !prev);
       setLoading(false);
     }
   };
 
-  const handleFilters = async ({
-    statusArg,
-    sort,
-    search
-  }: {
-    statusArg?: string;
-    sort?: string;
-    search?: string;
-  } = {}) => {
-    try {
-      setLoading(true);
-      const response = await listQRQuery({
-        search: search ?? searchTerm,
-        sort: sort ?? sortBy,
-        status: statusArg ?? (status === "All" ? "" : status)
-      });
-      setQrData(response.results);
-      setNext(response.next);
-      setPrev(response.previous);
-    } catch (error) {
-      toast.error("Error occured while fetching QRs with selected filters", {
-        position: "top-right",
-        style: errorToast
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleNext = async () => {
-    if (next) {
-      try {
-        setLoading(true);
-        const response = await listQRPaginated(next);
-        setQrData(response.results);
-        setNext(response.next);
-        setPrev(response.previous);
-      } catch (error) {
-        toast.error("Error occured while fetching QRs", {
-          position: "top-right",
-          style: errorToast
-        });
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const handlePrev = async () => {
-    if (prev) {
-      try {
-        setLoading(true);
-        const response = await listQRPaginated(prev);
-        setQrData(response.results);
-        setNext(response.next);
-        setPrev(response.previous);
-      } catch (error) {
-        toast.error("Error occured while fetching QRs", {
-          position: "top-right",
-          style: errorToast
-        });
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  if (loadingPrinters || loadingQRs || loading) return <Loader />;
+  if (loadingPrinters || loading) return <Loader />;
 
   return (
     <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
@@ -167,7 +136,7 @@ const QRGenerator = () => {
             <div className="text-sm text-muted-foreground mb-1">Total QR generation limit for your plan</div>
             <div className="flex items-center gap-1">
               <img src="/total-scans.png" className="w-7 h-7" />
-              <span className="text-2xl font-bold pb-1">{data.qr_generation_limit}</span>
+              <span className="text-2xl font-bold pb-1">{qrGenerationLimit}</span>
             </div>
           </CardContent>
         </Card>
@@ -253,7 +222,13 @@ const QRGenerator = () => {
                   />
                 </div>
                 <button className="absolute right-0 h-8 w-10 flex rounded-r-md justify-center items-center bg-gray-300">
-                  <Search className="h-4 w-4 text-muted-foreground" onClick={() => handleFilters()} />
+                  <Search
+                    className="h-4 w-4 text-muted-foreground"
+                    onClick={() => {
+                      setSearch((prev) => !prev);
+                      setCurrentPage(1);
+                    }}
+                  />
                 </button>
               </div>
             </div>
@@ -265,7 +240,6 @@ const QRGenerator = () => {
                   value={sortBy}
                   onValueChange={(val) => {
                     setSortBy(val);
-                    handleFilters({ sort: val });
                   }}>
                   <SelectTrigger className="w-40 h-8">
                     <SelectValue />
@@ -282,7 +256,6 @@ const QRGenerator = () => {
                   value={status}
                   onValueChange={(val) => {
                     setStatus(val);
-                    handleFilters({ statusArg: val === "All" ? "" : val });
                   }}>
                   <SelectTrigger className="w-32 h-8">
                     <SelectValue />
@@ -341,25 +314,66 @@ const QRGenerator = () => {
               )}
             </TableBody>
           </Table>
-          {(prev || next) && (
-            <div className="w-full flex justify-center mt-6">
-              <div className="flex gap-4">
-                <Button
-                  className="px-4 py-2 text-sm text-grat-700 bg-transparent rounded-md border border-2 hover:bg-gray-100"
-                  disabled={prev === null}
-                  onClick={handlePrev}>
-                  Back
-                </Button>
-                <Button
-                  className="px-4 py-2 text-sm text-gray-700 bg-transparent rounded-md border border-2 hover:bg-gray-100"
-                  disabled={next === null}
-                  onClick={handleNext}>
-                  Next
-                </Button>
-              </div>
-            </div>
-          )}
         </CardContent>
+        {/* Pagination */}
+        {!loading && qrData.length > 0 && totalPages > 1 && (
+          <div className="px-6 py-4 border-none">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalCount)} of{" "}
+                {totalCount} results
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+
+                  {/* Page Numbers */}
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNumber: number;
+                    if (totalPages <= 5) {
+                      pageNumber = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNumber = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNumber = totalPages - 4 + i;
+                    } else {
+                      pageNumber = currentPage - 2 + i;
+                    }
+
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(pageNumber)}
+                          isActive={currentPage === pageNumber}
+                          className="cursor-pointer">
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );

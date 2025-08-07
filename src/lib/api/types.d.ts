@@ -175,6 +175,9 @@ export interface ListQRResponse {
   total_count: number;
   qr_generation_limit: number;
   current_count: number;
+  count: number;
+  page: number;
+  page_size: number;
   next: string | null;
   previous: string | null;
   results: Fingerprint[];

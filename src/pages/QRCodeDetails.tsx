@@ -2,16 +2,15 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useBlocker, useNavigate, useParams } from "react-router-dom";
+import { useBlocker, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ProductApiResponse, ProductsFilter, QRDetailsResponse } from "@/lib/api/types";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { useAxios } from "@/hooks/useAxios";
-import { deleteQR, downloadQR, getAllProductsQuery, getQR, updateQR } from "@/lib/api/methods";
+import { downloadQR, getQR, listProducts, updateQR } from "@/lib/api/methods";
 import ActiveQRLandingPage from "@/components/ActiveQRLandingPage";
 import InActiveQRLandingPage from "@/components/InActiveQRLandingPage";
-import ConfirmDialog from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 import Loader from "@/components/Loader";
 import { errorToast, successToast } from "@/lib/utils";
@@ -26,10 +25,11 @@ interface LinkedProduct {
 const QRCodeDetails = () => {
   const params = useParams();
 
-  const { data: products, isLoading: loadingProducts } = useAxios<ProductApiResponse, ProductsFilter>(
-    getAllProductsQuery,
-    { status: "Active", search: "", all: true }
-  );
+  const { data: products, isLoading: loadingProducts } = useAxios<ProductApiResponse, ProductsFilter>(listProducts, {
+    status: "Active",
+    search: "",
+    all: true
+  });
   const { data: qrData, isLoading: loadingQr, refetch } = useAxios<QRDetailsResponse, string>(getQR, params.fId);
 
   const [status, setStatus] = useState<string>("");

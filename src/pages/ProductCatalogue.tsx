@@ -3,37 +3,66 @@ import { Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
-import { useAxios } from "@/hooks/useAxios";
-import { createProduct, getAllProducts, getAllProductsPaginated, getAllProductsQuery } from "@/lib/api/methods";
-import { Product, ProductApiResponse } from "@/lib/api/types";
+import { createProduct, listProducts } from "@/lib/api/methods";
+import { Product } from "@/lib/api/types";
 import Loader from "@/components/Loader";
 import { errorToast, successToast } from "@/lib/utils";
 import { toast } from "sonner";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationLink,
+  PaginationEllipsis,
+  PaginationNext
+} from "@/components/ui/pagination";
+import { qrData } from "@/data/mockQRData";
 
 const ProductCatalogue = () => {
-  const { data, isLoading, refetch } = useAxios(getAllProducts, { all: false });
+  const [productName, setProductName] = useState<string>("");
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [totalProduct, setTotalProducts] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [productName, setProductName] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("latest");
   const [status, setStatus] = useState<string>("All");
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [prev, setPrev] = useState<string | null>(null);
-  const [next, setNext] = useState<string | null>(null);
+  const [search, setSearch] = useState<boolean>(false);
+
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalCount, setTotalCount] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const pageSize = 10;
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading) {
-      setProducts(data.results);
-      setNext(data.next);
-      setPrev(data.previous);
-    }
-  }, [data]);
+    (async () => {
+      setLoading(true);
+      const response = await listProducts({
+        page: currentPage,
+        page_size: pageSize,
+        status: status === "All" ? "" : status,
+        search: searchTerm,
+        sort: sortBy
+      });
+      console.log("Real...", response);
+      setProducts(response.results);
+      setTotalProducts(response.total_count);
+      setTotalCount(response.count);
+      setTotalPages(Math.ceil(response.count / pageSize));
+      setLoading(false);
+    })();
+  }, [status, search, sortBy, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [status, sortBy]);
 
   const handleCreateProduct = async () => {
     try {
@@ -50,80 +79,14 @@ const ProductCatalogue = () => {
         style: errorToast
       });
     } finally {
-      await refetch();
+      // reload the page by changing state
+      setSearch((prev) => !prev);
+      setProductName("");
       setLoading(false);
     }
   };
 
-  const handleFilters = async ({
-    statusArg,
-    sort,
-    search
-  }: {
-    statusArg?: string;
-    sort?: string;
-    search?: string;
-  } = {}) => {
-    try {
-      setLoading(true);
-      const response = await getAllProductsQuery({
-        search: search ?? searchTerm,
-        sort: sort ?? sortBy,
-        status: statusArg ?? (status === "All" ? "" : status),
-        all: false
-      });
-      setProducts(response.results);
-      setNext(response.next);
-      setPrev(response.previous);
-    } catch (error) {
-      toast.error("Error occured while fetching QRs with selected filters", {
-        position: "top-right",
-        style: errorToast
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleNext = async () => {
-    if (next) {
-      try {
-        setLoading(true);
-        const response = await getAllProductsPaginated(next);
-        setProducts(response.results);
-        setNext(response.next);
-        setPrev(response.previous);
-      } catch (error) {
-        toast.error("Error occured while fetching QRs", {
-          position: "top-right",
-          style: errorToast
-        });
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const handlePrev = async () => {
-    if (prev) {
-      try {
-        setLoading(true);
-        const response = await getAllProductsPaginated(prev);
-        setProducts(response.results);
-        setNext(response.next);
-        setPrev(response.previous);
-      } catch (error) {
-        toast.error("Error occured while fetching QRs", {
-          position: "top-right",
-          style: errorToast
-        });
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  if (loading || isLoading) return <Loader />;
+  if (loading) return <Loader />;
 
   return (
     <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
@@ -136,7 +99,7 @@ const ProductCatalogue = () => {
             <div className="text-sm text-gray-700 text-muted-foreground mb-1">Total products added</div>
             <div className="flex items-center gap-1">
               <img src="/hexagon.png" className="w-7 h-7" />
-              <span className="text-2xl font-bold pb-1">{data.total_count}</span>
+              <span className="text-2xl font-bold pb-1">{totalProduct}</span>
             </div>
           </CardContent>
         </Card>
@@ -186,7 +149,10 @@ const ProductCatalogue = () => {
                 </div>
                 <button
                   className="absolute right-0 h-8 w-10 flex rounded-r-md justify-center items-center bg-gray-300"
-                  onClick={() => handleFilters()}>
+                  onClick={() => {
+                    setCurrentPage(1);
+                    setSearch((prev) => !prev);
+                  }}>
                   <Search className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
@@ -201,7 +167,6 @@ const ProductCatalogue = () => {
                   value={sortBy}
                   onValueChange={(val) => {
                     setSortBy(val);
-                    handleFilters({ sort: val });
                   }}>
                   <SelectTrigger className="w-40 h-8">
                     <SelectValue />
@@ -218,7 +183,6 @@ const ProductCatalogue = () => {
                   value={status}
                   onValueChange={(val) => {
                     setStatus(val);
-                    handleFilters({ statusArg: val === "All" ? "" : val });
                   }}>
                   <SelectTrigger className="w-32 h-8">
                     <SelectValue />
@@ -273,25 +237,66 @@ const ProductCatalogue = () => {
               )}
             </TableBody>
           </Table>
-          {(prev || next) && (
-            <div className="w-full flex justify-center mt-6">
-              <div className="flex gap-4">
-                <Button
-                  className="px-4 py-2 text-sm text-grat-700 bg-transparent rounded-md border border-2 hover:bg-gray-100"
-                  disabled={prev === null}
-                  onClick={handlePrev}>
-                  Back
-                </Button>
-                <Button
-                  className="px-4 py-2 text-sm text-gray-700 bg-transparent rounded-md border border-2 hover:bg-gray-100"
-                  disabled={next === null}
-                  onClick={handleNext}>
-                  Next
-                </Button>
-              </div>
-            </div>
-          )}
         </CardContent>
+        {/* Pagination */}
+        {!loading && products.length > 0 && totalPages > 1 && (
+          <div className="px-6 py-4 border-none">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalCount)} of{" "}
+                {totalCount} results
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+
+                  {/* Page Numbers */}
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNumber: number;
+                    if (totalPages <= 5) {
+                      pageNumber = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNumber = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNumber = totalPages - 4 + i;
+                    } else {
+                      pageNumber = currentPage - 2 + i;
+                    }
+
+                    return (
+                      <PaginationItem key={pageNumber}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(pageNumber)}
+                          isActive={currentPage === pageNumber}
+                          className="cursor-pointer">
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );
