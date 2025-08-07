@@ -28,13 +28,13 @@ const QRCodeDetails = () => {
 
   const { data: products, isLoading: loadingProducts } = useAxios<ProductApiResponse, ProductsFilter>(
     getAllProductsQuery,
-    { status: "Active", search: "" }
+    { status: "Active", search: "", all: true }
   );
   const { data: qrData, isLoading: loadingQr, refetch } = useAxios<QRDetailsResponse, string>(getQR, params.fId);
 
   const [status, setStatus] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [linkedProduct, setLinkedProduct] = useState<LinkedProduct>({});
+  const [linkedProduct, setLinkedProduct] = useState<LinkedProduct | null>(null);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
 
   const blocker = useBlocker(
@@ -65,6 +65,7 @@ const QRCodeDetails = () => {
 
   useEffect(() => {
     if (!loadingQr) {
+      console.log(qrData);
       setLinkedProduct(qrData.product);
       setStatus(qrData.status);
     }
@@ -73,7 +74,7 @@ const QRCodeDetails = () => {
   const handleSave = async () => {
     try {
       setLoading(true);
-      await updateQR(qrData.id.toString(), { status, product: linkedProduct.id });
+      await updateQR(qrData.id.toString(), { status, product: linkedProduct ? linkedProduct.id : null });
       await refetch();
       toast.success("QR details updated successfully", {
         position: "top-right",
@@ -81,6 +82,7 @@ const QRCodeDetails = () => {
       });
       setUnsavedChanges(false);
     } catch (error) {
+      console.log(error);
       toast.error("Error occured while saving", {
         position: "top-right",
         style: errorToast
@@ -218,7 +220,8 @@ const QRCodeDetails = () => {
                       <SelectTrigger className="w-32 border-none shadow-none h-5 relative hover:border-none focus:outline-none focus:ring-0 [&>svg]:hidden">
                         <span className="text-sm text-green-600 font-semibold">Link Product</span>
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="max-h-64 overflow-y-auto">
+                        <SelectItem value="null">Unlink Product</SelectItem>
                         {products.results.map((product) => (
                           <SelectItem key={product.id} value={product.id.toString()}>
                             {product.product_name}

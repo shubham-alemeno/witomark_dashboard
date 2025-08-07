@@ -32,7 +32,6 @@ const QRGenerator = () => {
 
   useEffect(() => {
     if (!loadingQRs) {
-      console.log(data);
       setQrData(data.results);
       setNext(data.next);
       setPrev(data.previous);

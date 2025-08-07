@@ -108,6 +108,7 @@ export interface ProductsFilter {
   status?: string;
   sort?: string;
   search?: string;
+  all?: boolean;
 }
 
 export interface CreateProductRequest {

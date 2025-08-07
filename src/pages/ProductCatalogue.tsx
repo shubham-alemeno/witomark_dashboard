@@ -29,7 +29,6 @@ const ProductCatalogue = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      console.log(data);
       setProducts(data.results);
       setNext(data.next);
       setPrev(data.previous);
@@ -56,19 +55,28 @@ const ProductCatalogue = () => {
     }
   };
 
-  const handleFilters = async (statusArg?: string, searchArg?: string) => {
+  const handleFilters = async ({
+    statusArg,
+    sort,
+    search
+  }: {
+    statusArg?: string;
+    sort?: string;
+    search?: string;
+  } = {}) => {
     try {
       setLoading(true);
       const response = await getAllProductsQuery({
-        status: statusArg ?? (status == "All" ? "" : status),
-        search: searchArg ?? searchTerm
+        search: search ?? searchTerm,
+        sort: sort ?? sortBy,
+        status: statusArg ?? (status === "All" ? "" : status),
+        all: false
       });
       setProducts(response.results);
       setNext(response.next);
       setPrev(response.previous);
-      console.log(response);
     } catch (error) {
-      toast.error("Error occured while filtering products", {
+      toast.error("Error occured while fetching QRs with selected filters", {
         position: "top-right",
         style: errorToast
       });
@@ -85,7 +93,6 @@ const ProductCatalogue = () => {
         setProducts(response.results);
         setNext(response.next);
         setPrev(response.previous);
-        console.log(response);
       } catch (error) {
         toast.error("Error occured while fetching QRs", {
           position: "top-right",
@@ -105,7 +112,6 @@ const ProductCatalogue = () => {
         setProducts(response.results);
         setNext(response.next);
         setPrev(response.previous);
-        console.log(response);
       } catch (error) {
         toast.error("Error occured while fetching QRs", {
           position: "top-right",
@@ -191,7 +197,12 @@ const ProductCatalogue = () => {
 
               {/* Sort and Status */}
               <div className="flex gap-2">
-                <Select value={sortBy} onValueChange={setSortBy}>
+                <Select
+                  value={sortBy}
+                  onValueChange={(val) => {
+                    setSortBy(val);
+                    handleFilters({ sort: val });
+                  }}>
                   <SelectTrigger className="w-40 h-8">
                     <SelectValue />
                   </SelectTrigger>
@@ -207,7 +218,7 @@ const ProductCatalogue = () => {
                   value={status}
                   onValueChange={(val) => {
                     setStatus(val);
-                    handleFilters(val === "All" ? "" : val);
+                    handleFilters({ statusArg: val === "All" ? "" : val });
                   }}>
                   <SelectTrigger className="w-32 h-8">
                     <SelectValue />

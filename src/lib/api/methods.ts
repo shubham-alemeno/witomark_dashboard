@@ -96,7 +96,9 @@ export const getAllProductsPaginated = async (url: string): Promise<ProductApiRe
 };
 
 export const getAllProductsQuery = async (args?: ProductsFilter, page = 1, limit = 10): Promise<ProductApiResponse> => {
-  const response = await apiClient.get(`/api/products/products/?status=${args.status}&search=${args.search}`);
+  const response = await apiClient.get(
+    `/api/products/products/?status=${args.status}&search=${args.search}&sort=${args.sort}&all=${args.all}`
+  );
   return response.data;
 };
 
