@@ -39,7 +39,7 @@ const router = createBrowserRouter([
       { path: "product-catalogue/:productId/:pname", element: <ProductDetails /> },
       { path: "printers", element: <Printers /> },
       { path: "plan-details", element: <PlanDetails /> },
-      { path: "alerts", element: <Alerts /> }
+      { path: "alerts", element: <BulkQREditor /> }
     ]
   },
   {

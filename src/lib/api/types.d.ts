@@ -220,3 +220,9 @@ export interface UpdateQRRequest {
   status?: string;
   product?: number;
 }
+
+export interface QRUpdate {
+  id: number;
+  product?: number;
+  status?: string;
+}

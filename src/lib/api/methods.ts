@@ -12,7 +12,8 @@ import {
   BulkQRCreateRequest,
   ListQRResponse,
   QRDetailsResponse,
-  UpdateQRRequest
+  UpdateQRRequest,
+  QRUpdate
 } from "./types";
 
 // Dashboard API Methods
@@ -183,4 +184,25 @@ export const downloadQR = async (id: string, format: string) => {
     `/api/fingerprints/download-fingerprint/?fingerprint_id=${id}&file_format=${format}`
   );
   return response.data;
+};
+
+export const bulkUpdate = async (data: Record<number, { product?: number; status?: string }>) => {
+  const transformedArray = Object.entries(data).map(([idStr, value]) => {
+    const id = Number(idStr);
+
+    const transformed: { id: number; product?: number; status?: string } = { id };
+
+    if ("product" in value) {
+      transformed.product = value.product === -1 ? null : value.product;
+    }
+
+    if ("status" in value) {
+      transformed.status = value.status;
+    }
+
+    return transformed;
+  });
+  // console.log(transformedArray);
+
+  await apiClient.patch(`/api/fingerprints/qr_fingerprints/bulk_update/`, { updates: transformedArray });
 };
