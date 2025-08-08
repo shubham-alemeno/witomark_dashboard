@@ -226,3 +226,9 @@ export interface QRUpdate {
   product?: number;
   status?: string;
 }
+
+export interface BulkDownloadPayload {
+  from: number;
+  to: number;
+  file_format: string;
+}

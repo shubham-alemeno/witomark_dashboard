@@ -13,7 +13,8 @@ import {
   ListQRResponse,
   QRDetailsResponse,
   UpdateQRRequest,
-  QRUpdate
+  QRUpdate,
+  BulkDownloadPayload
 } from "./types";
 
 // Dashboard API Methods
@@ -205,4 +206,12 @@ export const bulkUpdate = async (data: Record<number, { product?: number; status
   // console.log(transformedArray);
 
   await apiClient.patch(`/api/fingerprints/qr_fingerprints/bulk_update/`, { updates: transformedArray });
+};
+
+export const bulkDownload = async (data: BulkDownloadPayload) => {
+  const response = await apiClient.get(
+    `/api/fingerprints/bulk-download/serial/?from_serial=${data.from}&to_serial=${data.to}&file_format=${data.file_format}`
+  );
+  console.log(response);
+  return response.data;
 };
