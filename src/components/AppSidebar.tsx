@@ -1,16 +1,6 @@
-import { AlertCircle, BookOpen, Bot, DollarSign, Printer, Settings2, SquareTerminal } from "lucide-react";
+import { AlertCircle, BookOpen, Bot, DollarSign, Printer, Download, Edit, SquareTerminal } from "lucide-react";
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail
-} from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
 import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
 import { NavMain } from "@/components/NavMain";
 import { NavUser } from "@/components/NavUser";
@@ -53,6 +43,18 @@ const data = {
       title: "QR Generator",
       url: "/qr-generator",
       icon: Bot,
+      items: []
+    },
+    {
+      title: "QR Downloader",
+      url: "/qr-downloader",
+      icon: Download,
+      items: []
+    },
+    {
+      title: "QR Editor",
+      url: "/qr-editor",
+      icon: Edit,
       items: []
     },
     {

@@ -9,6 +9,8 @@ const pageTitles: Record<string, string> = {
   "/": "Dashboard",
   "/dashboard": "Dashboard",
   "/qr-generator": "QR Generator",
+  "/qr-downloader": "QR Downloader",
+  "/qr-editor": "QR Editor",
   "/product-catalogue": "Product Catalogue",
   "/printers": "Printers",
   "/plan-details": "Plan Details",

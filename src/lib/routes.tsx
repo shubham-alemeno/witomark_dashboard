@@ -34,12 +34,14 @@ const router = createBrowserRouter([
       { path: "dashboard", element: <Dashboard /> },
       { path: "dashboard/scan/:scanId", element: <ScanPage /> },
       { path: "qr-generator", element: <QRGenerator /> },
+      { path: "qr-downloader", element: <BulkQRDownloader /> },
+      { path: "qr-editor", element: <BulkQREditor /> },
       { path: "qr-generator/:fId", element: <QRCodeDetails /> },
       { path: "product-catalogue", element: <ProductCatalogue /> },
       { path: "product-catalogue/:productId/:pname", element: <ProductDetails /> },
       { path: "printers", element: <Printers /> },
       { path: "plan-details", element: <PlanDetails /> },
-      { path: "alerts", element: <BulkQRDownloader /> }
+      { path: "alerts", element: <Alerts /> }
     ]
   },
   {
