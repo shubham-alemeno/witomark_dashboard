@@ -157,6 +157,7 @@ export interface Fingerprint {
   fingerprint_id: string;
   serial_number: number;
   company_name: string;
+  product_id: number; // refers to the database_Id not the custom uuid
   product_name: string;
   printer_name: string;
   status: string;

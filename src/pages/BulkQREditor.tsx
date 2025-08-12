@@ -82,6 +82,7 @@ const BulkQREditor = () => {
         search: searchTerm,
         sort: sortBy
       });
+      console.log(response);
       setQrData(response.results);
       setTotalCount(response.count);
       setTotalPages(Math.ceil(response.count / pageSize));
@@ -223,7 +224,7 @@ const BulkQREditor = () => {
                     <TableCell className="font-medium pl-5">#{item.id}</TableCell>
                     <TableCell>
                       <Select
-                        value={editedData[item.id]?.product?.toString() ?? item.product_name}
+                        value={editedData[item.id]?.product?.toString() ?? item?.product_id?.toString()}
                         onValueChange={(value) => handleFieldChange(item.id, "product", parseInt(value))}>
                         <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Select product" />
