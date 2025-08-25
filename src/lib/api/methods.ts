@@ -2,7 +2,6 @@ import { apiClient } from "./apiClient";
 import {
   LoginRequest,
   LoginResponse,
-  PrinterApiResponse,
   MapStatsResponse,
   MapScansResponse,
   CreateProductRequest,
@@ -13,8 +12,8 @@ import {
   ListQRResponse,
   QRDetailsResponse,
   UpdateQRRequest,
-  QRUpdate,
-  BulkDownloadPayload
+  BulkDownloadPayload,
+  Printer
 } from "./types";
 
 // Dashboard API Methods
@@ -71,6 +70,7 @@ export const getMapScans = async (
   if (companyId) params.append("company_id", companyId);
 
   const response = await apiClient.get(`/api/fingerprints/map/scans/?${params.toString()}`);
+  console.log(response.data);
   return response.data;
 };
 
@@ -79,7 +79,7 @@ export const loginUser = async (data: LoginRequest): Promise<LoginResponse> => {
   return response.data;
 };
 
-export const getAllPrinters = async (page = 1, limit = 10): Promise<PrinterApiResponse> => {
+export const getAllPrinters = async (page = 1, limit = 10): Promise<Printer[]> => {
   const response = await apiClient.get(`/api/printers/?all=true`);
   console.log(response);
   return response.data;

@@ -461,7 +461,7 @@ const Dashboard = () => {
                           onClick={() => openGoogleMaps(scan.latitude, scan.longitude)}
                           className="text-[#02bc5f] hover:text-[#029951] font-medium hover:underline cursor-pointer 
                overflow-hidden text-ellipsis whitespace-nowrap max-w-80 2xl:max-w-full text-left">
-                          {scan.location}
+                          {scan.location.includes("API error") ? "No location" : scan.location}
                         </button>
                       </TableCell>
                       <TableCell className="text-right">
