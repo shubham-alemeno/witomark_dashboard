@@ -182,8 +182,8 @@ const QRGenerator = () => {
                         <SelectValue placeholder="Select printer" />
                       </SelectTrigger>
                       <SelectContent>
-                        {printers.results.length > 0 &&
-                          printers.results.map((printer) => (
+                        {printers.length > 0 &&
+                          printers.map((printer) => (
                             <SelectItem key={printer.id} value={printer.id.toString()}>
                               {printer.printer_name}
                             </SelectItem>

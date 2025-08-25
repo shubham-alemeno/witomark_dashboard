@@ -80,7 +80,8 @@ export const loginUser = async (data: LoginRequest): Promise<LoginResponse> => {
 };
 
 export const getAllPrinters = async (page = 1, limit = 10): Promise<PrinterApiResponse> => {
-  const response = await apiClient.get(`/api/printers/?page=${page}&limit=${limit}`);
+  const response = await apiClient.get(`/api/printers/?all=true`);
+  console.log(response);
   return response.data;
 };
 
