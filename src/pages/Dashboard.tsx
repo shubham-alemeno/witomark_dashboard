@@ -92,7 +92,11 @@ const Dashboard = () => {
         !isNaN(scan.latitude) &&
         !isNaN(scan.longitude) &&
         scan.latitude !== 0 &&
-        scan.longitude !== 0
+        scan.longitude !== 0 &&
+        scan.latitude >= -90 &&
+        scan.latitude <= 90 &&
+        scan.longitude >= -180 &&
+        scan.longitude <= 180
     )
     .map((scan, index) => ({
       id: index + 1,
@@ -457,12 +461,16 @@ const Dashboard = () => {
                       <TableCell>{scan.product_name === "Unknown Product" ? "-" : scan.product_name}</TableCell>
                       <TableCell className="text-gray-600">{new Date(scan.scan_time).toLocaleString()}</TableCell>
                       <TableCell className="text-gray-600">
-                        <button
-                          onClick={() => openGoogleMaps(scan.latitude, scan.longitude)}
-                          className="text-[#02bc5f] hover:text-[#029951] font-medium hover:underline cursor-pointer 
+                        {scan.location.includes("API error") ? (
+                          <p>-</p>
+                        ) : (
+                          <button
+                            onClick={() => openGoogleMaps(scan.latitude, scan.longitude)}
+                            className="text-[#02bc5f] hover:text-[#029951] font-medium hover:underline cursor-pointer 
                overflow-hidden text-ellipsis whitespace-nowrap max-w-80 2xl:max-w-full text-left">
-                          {scan.location.includes("API error") ? "No location" : scan.location}
-                        </button>
+                            {scan.location}
+                          </button>
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button

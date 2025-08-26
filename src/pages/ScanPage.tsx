@@ -44,6 +44,7 @@ const ScanPage: React.FC = () => {
         setLoading(true);
         // Fetch all scans and find the specific one
         // In a real app, you'd have an API endpoint for a single scan
+        // PS: It's been a month and we still don't have that API
         const response = await getMapScans();
         const scan = response.data.find((s: MapScanData) => s.scan_id === scanId);
 
@@ -164,11 +165,15 @@ const ScanPage: React.FC = () => {
             {/* Location */}
             <div className="grid grid-cols-3">
               <span className="text-sm col-span-1 font-medium text-gray-600">Location:</span>
-              <button
-                onClick={openGoogleMaps}
-                className="text-sm col-span-2 text-[#02bc5f] hover:text-[#029951] hover:underline cursor-pointer font-medium text-left">
-                {scanDetails.location}
-              </button>
+              {scanDetails.location.includes("API error") ? (
+                <p>-</p>
+              ) : (
+                <button
+                  onClick={openGoogleMaps}
+                  className="text-sm col-span-2 text-[#02bc5f] hover:text-[#029951] hover:underline cursor-pointer font-medium text-left">
+                  {scanDetails.location}
+                </button>
+              )}
             </div>
             <hr />
             {/* QR Serial No */}
@@ -197,7 +202,7 @@ const ScanPage: React.FC = () => {
 
         {/* Map Section - Full Height */}
         <div className="h-full rounded-lg overflow-hidden">
-          {scanDetails.latitude && scanDetails.longitude ? (
+          {scanDetails.latitude && scanDetails.longitude && !scanDetails.location.includes("API error") ? (
             <WorldMap
               locationData={[
                 {
