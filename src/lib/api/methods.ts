@@ -1,218 +1,142 @@
 import { apiClient } from "./apiClient";
 import {
+  DashboardFilters,
+  DashboardStats,
+  ListFilters,
   LoginRequest,
   LoginResponse,
-  MapStatsResponse,
-  MapScansResponse,
-  CreateProductRequest,
-  ProductApiResponse,
-  ProductResponse,
-  UpdateProductRequest,
-  BulkQRCreateRequest,
-  ListQRResponse,
-  QRDetailsResponse,
-  UpdateQRRequest,
-  BulkDownloadPayload,
-  Printer
+  LoginUserData,
+  MyPrinter,
+  MyProduct,
+  Paginated,
+  PrintersResponse,
+  Scan,
+  ScanLocation,
+  ScanLocationsResponse,
+  Subscription,
+  UserProfile,
+  Witomark
 } from "./types";
 
-// Dashboard API Methods
-export const getMapStats = async (
-  timeRange: string = "30d",
-  companyId?: string,
-  startDate?: string,
-  endDate?: string
-): Promise<MapStatsResponse> => {
-  const params = new URLSearchParams();
-
-  if (timeRange) {
-    params.append("time_range", timeRange);
-  }
-  if (startDate) params.append("start_date", startDate);
-  if (endDate) params.append("end_date", endDate);
-  if (companyId) {
-    params.append("company_id", companyId);
-  }
-
-  const response = await apiClient.get(`/api/fingerprints/map/stats/?${params.toString()}`);
-  return response.data;
-};
-
-export const getMapScans = async (
-  timeRange: string = "30d",
-  authenticationResult?: string,
-  search?: string,
-  sortBy: string = "latest",
-  status?: string,
-  version?: string,
-  hasLocation: boolean = true,
-  page: number = 1,
-  pageSize: number = 100,
-  companyId?: string,
-  startDate?: string,
-  endDate?: string
-): Promise<MapScansResponse> => {
-  const params = new URLSearchParams();
-
-  if (timeRange) {
-    params.append("time_range", timeRange);
-  }
-  if (startDate) params.append("start_date", startDate);
-  if (endDate) params.append("end_date", endDate);
-  if (authenticationResult) params.append("authentication_result", authenticationResult);
-  if (search) params.append("search", search);
-  params.append("sort_by", sortBy);
-  if (status) params.append("status", status);
-  if (version) params.append("version", version);
-  params.append("has_location", hasLocation.toString());
-  params.append("page", page.toString());
-  params.append("page_size", pageSize.toString());
-  if (companyId) params.append("company_id", companyId);
-
-  const response = await apiClient.get(`/api/fingerprints/map/scans/?${params.toString()}`);
-  console.log(response.data);
-  return response.data;
-};
-
+// ============================================================
+// Auth
+// ============================================================
 export const loginUser = async (data: LoginRequest): Promise<LoginResponse> => {
   const response = await apiClient.post("/api/auth/login/", data);
   return response.data;
 };
 
-export const getAllPrinters = async (page = 1, limit = 10): Promise<Printer[]> => {
-  const response = await apiClient.get(`/api/printers/?all=true`);
-  console.log(response);
+// ============================================================
+// Profile — composed from the login response cached in localStorage
+// (login stores `user` and `subscription`). No network call.
+// ============================================================
+export const getProfile = async (): Promise<UserProfile> => {
+  const user: LoginUserData | null = JSON.parse(localStorage.getItem("user") || "null");
+  const subscription: Subscription | null = JSON.parse(localStorage.getItem("subscription") || "null");
+
+  return {
+    username: user?.username ?? "",
+    company_name: user?.company_id ?? "",
+    company_logo: user?.company_logo ?? null,
+    plan: subscription?.subscription_plan ? `${subscription.subscription_plan} Plan` : ""
+  };
+};
+
+// ============================================================
+// Helpers
+// ============================================================
+const DURATION_MAP: Record<string, string> = {
+  "7days": "7d",
+  "30days": "30d",
+  "90days": "90d",
+  custom: "custom"
+};
+
+const buildDurationParams = (params: URLSearchParams, filters: DashboardFilters) => {
+  const duration = DURATION_MAP[filters.duration || "30days"] || "30d";
+  params.set("duration", duration);
+  if (duration === "custom" && filters.startDate && filters.endDate) {
+    params.set("date_from", filters.startDate);
+    params.set("date_to", filters.endDate);
+  }
+};
+
+// ============================================================
+// Dashboard
+// ============================================================
+export const getDashboardStats = async (filters: DashboardFilters = {}): Promise<DashboardStats> => {
+  const params = new URLSearchParams();
+  buildDurationParams(params, filters);
+  const response = await apiClient.get(`/api/company/dashboard/stats/?${params.toString()}`);
   return response.data;
 };
 
-export const listProducts = async (
-  {
-    page,
-    page_size,
-    status,
-    search,
-    sort,
-    all
-  }: {
-    page?: number;
-    page_size?: number;
-    status?: string;
-    search?: string;
-    sort?: string;
-    all?: boolean;
-  } = { status: "", search: "", sort: "" }
-): Promise<ProductApiResponse> => {
-  const response = await apiClient.get(
-    `/api/products/products/?page_size=${page_size}&page=${page}&status=${status}&search=${search}&sort=${sort}&all=${all}`
+export const getScans = async (filters: DashboardFilters = {}): Promise<Paginated<Scan>> => {
+  const params = new URLSearchParams();
+  buildDurationParams(params, filters);
+  if (filters.search) params.set("search", filters.search);
+  if (filters.sort === "oldest") params.set("sort", "oldest");
+  if (filters.result && filters.result !== "all") params.set("result", filters.result);
+  params.set("page", String(filters.page ?? 1));
+  params.set("page_size", String(filters.page_size ?? 20));
+
+  const response = await apiClient.get(`/api/company/dashboard/scan-data/?${params.toString()}`);
+  return response.data;
+};
+
+// ============================================================
+// Map view
+// ============================================================
+export const getScanLocations = async (filters: DashboardFilters = {}): Promise<ScanLocation[]> => {
+  const params = new URLSearchParams();
+  buildDurationParams(params, filters);
+  if (filters.result && filters.result !== "all") params.set("result", filters.result);
+  const response = await apiClient.get<ScanLocationsResponse>(
+    `/api/company/qr-scan-locations/?${params.toString()}`
   );
+  return response.data.results;
+};
+
+// ============================================================
+// My Witomarks
+// ============================================================
+export const getWitomarks = async (filters: ListFilters = {}): Promise<Paginated<Witomark>> => {
+  const params = new URLSearchParams();
+  if (filters.search) params.set("search", filters.search);
+  if (filters.status && filters.status !== "All") params.set("status", filters.status);
+  params.set("page", String(filters.page ?? 1));
+  params.set("page_size", String(filters.page_size ?? 20));
+
+  const response = await apiClient.get(`/api/fingerprints/witomarks/?${params.toString()}`);
   return response.data;
 };
 
-export const createProduct = async (data: CreateProductRequest): Promise<ProductResponse> => {
-  const response = await apiClient.post("/api/products/products/", data);
+// ============================================================
+// My Products
+// ============================================================
+const PRODUCT_SORT_MAP: Record<string, string> = {
+  latest: "newest",
+  oldest: "oldest",
+  "name-asc": "a-z",
+  "name-desc": "z-a"
+};
+
+export const getProducts = async (filters: ListFilters = {}): Promise<Paginated<MyProduct>> => {
+  const params = new URLSearchParams();
+  if (filters.search) params.set("search", filters.search);
+  if (filters.sort) params.set("sort", PRODUCT_SORT_MAP[filters.sort] || "newest");
+  if (filters.status && filters.status !== "All") params.set("status", filters.status);
+  params.set("page", String(filters.page ?? 1));
+  params.set("page_size", String(filters.page_size ?? 20));
+
+  const response = await apiClient.get(`/api/products/products/?${params.toString()}`);
   return response.data;
 };
 
-export const getProduct = async (id: string): Promise<ProductResponse> => {
-  const response = await apiClient.get(`/api/products/products/${id}/`);
-  return response.data;
-};
-
-export const updateProduct = async (id: string, data: UpdateProductRequest) => {
-  const formData = new FormData();
-
-  if (data.product_name) formData.append("product_name", data.product_name);
-
-  if (data.product_description) formData.append("product_description", data.product_description);
-
-  if (data.status) formData.append("status", data.status);
-
-  if (data.product_image) formData.append("product_image", data.product_image);
-
-  const response = await apiClient.patch(`/api/products/products/${id}/`, formData, {
-    headers: {
-      // Let Axios/browser set the correct Content-Type with boundary
-      "Content-Type": "multipart/form-data"
-    }
-  });
-
-  return response;
-};
-
-export const deleteProduct = async (id: string) => {
-  await apiClient.delete(`/api/products/products/${id}/`);
-};
-
-export const createQR = async (data: BulkQRCreateRequest) => {
-  const response = await apiClient.post(`/api/fingerprints/qr_fingerprints/bulk_create/`, data);
-  return response;
-};
-
-export const getQR = async (id: string): Promise<QRDetailsResponse> => {
-  const response = await apiClient.get(`/api/fingerprints/qr_fingerprints/${id}/`);
-  return response.data;
-};
-
-export const listQRs = async (
-  {
-    page,
-    page_size,
-    status,
-    search,
-    sort,
-    all
-  }: {
-    page?: number;
-    page_size?: number;
-    status?: string;
-    search?: string;
-    sort?: string;
-    all?: boolean;
-  } = { status: "", search: "", sort: "" }
-): Promise<ListQRResponse> => {
-  const response = await apiClient.get(
-    `/api/fingerprints/qr_fingerprints/?page_size=${page_size}&page=${page}&status=${status}&search=${search}&sort=${sort}&all=${all}`
-  );
-  return response.data;
-};
-
-export const updateQR = async (id: string, args?: UpdateQRRequest) => {
-  const response = await apiClient.patch(`/api/fingerprints/qr_fingerprints/${id}/`, args);
-  return response;
-};
-
-export const downloadQR = async (id: string, format: string) => {
-  const response = await apiClient.get(
-    `/api/fingerprints/download-fingerprint/?fingerprint_id=${id}&file_format=${format}`
-  );
-  return response.data;
-};
-
-export const bulkUpdate = async (data: Record<number, { product?: number; status?: string }>) => {
-  const transformedArray = Object.entries(data).map(([idStr, value]) => {
-    const id = Number(idStr);
-
-    const transformed: { id: number; product?: number; status?: string } = { id };
-
-    if ("product" in value) {
-      transformed.product = value.product === -1 ? null : value.product;
-    }
-
-    if ("status" in value) {
-      transformed.status = value.status;
-    }
-
-    return transformed;
-  });
-  // console.log(transformedArray);
-
-  await apiClient.patch(`/api/fingerprints/qr_fingerprints/bulk_update/`, { updates: transformedArray });
-};
-
-export const bulkDownload = async (data: BulkDownloadPayload) => {
-  const response = await apiClient.get(
-    `/api/fingerprints/bulk-download/serial/?from_serial=${data.from}&to_serial=${data.to}&file_format=${data.file_format}`
-  );
-  console.log(response);
-  return response.data;
+// ============================================================
+// My Printers
+// ============================================================
+export const getPrinters = async (): Promise<MyPrinter[]> => {
+  const response = await apiClient.get<PrintersResponse>("/api/company/my-printers/");
+  return response.data.results;
 };

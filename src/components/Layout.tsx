@@ -8,37 +8,15 @@ import { useDocumentTitle } from "@/hooks/use-document-title";
 const pageTitles: Record<string, string> = {
   "/": "Dashboard",
   "/dashboard": "Dashboard",
-  "/qr-generator": "QR Generator",
-  "/qr-downloader": "QR Downloader",
-  "/qr-editor": "QR Editor",
-  "/product-catalogue": "Product Catalogue",
-  "/printers": "Printers",
-  "/plan-details": "Plan Details",
-  "/alerts": "Alerts"
+  "/my-witomarks": "My Witomarks",
+  "/my-products": "My Products",
+  "/my-printers": "My Printers"
 };
 
 const Layout = () => {
   const location = useLocation();
 
-  // Handle dynamic page titles for scan pages
-  const getPageTitle = () => {
-    if (location.pathname.startsWith("/dashboard/scan/")) {
-      const scanId = location.pathname.split("/").pop();
-      return `Scan #${scanId}`;
-    }
-    if (location.pathname.startsWith("/product-catalogue/")) {
-      const params = location.pathname.split("/");
-      const productName = decodeURIComponent(params[3]);
-      return `Product: ${productName} #${params[2]}`;
-    }
-    if (location.pathname.startsWith("/qr-generator/")) {
-      const params = location.pathname.split("/");
-      return `QR #${params[2]}`;
-    }
-    return pageTitles[location.pathname] || "Dashboard";
-  };
-
-  const pageTitle = getPageTitle();
+  const pageTitle = pageTitles[location.pathname] || "Dashboard";
 
   // Set document title
   useDocumentTitle(pageTitle);

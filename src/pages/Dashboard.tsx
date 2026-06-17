@@ -1,113 +1,77 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious
-} from "@/components/ui/pagination";
 import { Search } from "lucide-react";
 import { DateRangePicker } from "@/components/ui/date-picker";
 import { format } from "date-fns";
 import WorldMap from "@/components/WorldMap";
-import ScanDetailsPanel from "@/components/ScanDetailsPanel";
-import { getMapStats, getMapScans } from "@/lib/api/methods";
-import { MapStatsResponse, MapScanData } from "@/lib/api/types";
-import { useNavigate } from "react-router-dom";
+import TablePagination from "@/components/TablePagination";
+import { getDashboardStats, getScans, getScanLocations } from "@/lib/api/methods";
+import { DashboardStats, Scan, ScanLocation } from "@/lib/api/types";
 
-// Types
-interface ScanData {
-  id: string;
-  result: "genuine" | "tampered";
-  productName: string;
-  scanTime: string;
-  location: string;
-  qrSerialNo: string;
-}
+const PAGE_SIZE = 20;
 
-interface LocationData {
-  id: number;
-  lat: number;
-  lng: number;
-  status: "genuine" | "tampered";
-  location: string;
-  date: string;
-}
+const durationLabels: Record<string, string> = {
+  "7days": "last 7 days",
+  "30days": "last 30 days",
+  "90days": "last 90 days"
+};
+
+// Pull "lat,lng" out of a Google Maps URL like https://www.google.com/maps?q=18.6,77.8
+const parseLatLng = (url: string | null): { lat: number; lng: number } | null => {
+  if (!url) return null;
+  const match = url.match(/[?&]q=(-?\d+\.?\d*),\s*(-?\d+\.?\d*)/);
+  if (!match) return null;
+  return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+};
 
 const Dashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [viewType, setViewType] = useState("list");
+
+  // Filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchQuery, setSearchQuery] = useState(""); // Actual search query sent to API
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("latest");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [resultFilter, setResultFilter] = useState("all");
   const [durationFilter, setDurationFilter] = useState("30days");
   const [customStartDate, setCustomStartDate] = useState<Date | undefined>();
   const [customEndDate, setCustomEndDate] = useState<Date | undefined>();
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [selectedScan, setSelectedScan] = useState<any>(null);
 
-  // API Data State
-  const [mapStats, setMapStats] = useState<MapStatsResponse | null>(null);
-  const [scanData, setScanData] = useState<MapScanData[]>([]);
+  // Data
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [scans, setScans] = useState<Scan[]>([]);
+  const [scanLocations, setScanLocations] = useState<ScanLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Pagination State
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const pageSize = 100;
 
-  // Helper function to get duration label
   const getDurationLabel = () => {
     if (durationFilter === "custom" && customStartDate && customEndDate) {
       return `${format(customStartDate, "MMM d, yyyy")} - ${format(customEndDate, "MMM d, yyyy")}`;
     }
-    const labelMap: { [key: string]: string } = {
-      "7days": "last 7 days",
-      "30days": "last 30 days",
-      "90days": "last 90 days"
-    };
-    return labelMap[durationFilter] || "last 30 days";
+    return durationLabels[durationFilter] || "last 30 days";
   };
 
-  // Convert scan data to location data format for WorldMap
-  // Filter out invalid coordinates to prevent map errors
-  const locationDataForMap = scanData
-    .filter(
-      (scan) =>
-        scan.latitude &&
-        scan.longitude &&
-        !isNaN(scan.latitude) &&
-        !isNaN(scan.longitude) &&
-        scan.latitude !== 0 &&
-        scan.longitude !== 0 &&
-        scan.latitude >= -90 &&
-        scan.latitude <= 90 &&
-        scan.longitude >= -180 &&
-        scan.longitude <= 180
-    )
-    .map((scan, index) => ({
-      id: index + 1,
-      lat: scan.latitude,
-      lng: scan.longitude,
-      status: scan.result.value === 1 ? "genuine" : ("tampered" as "genuine" | "tampered"),
-      location: scan.location,
-      date: new Date(scan.scan_time).toLocaleDateString()
-    }));
+  // Map markers — driven by the dedicated locations endpoint
+  const locationDataForMap = scanLocations.map((loc, index) => ({
+    id: index + 1,
+    lat: loc.latitude,
+    lng: loc.longitude,
+    status: loc.result,
+    location: loc.reference_id,
+    date: new Date(loc.scanned_at).toLocaleDateString()
+  }));
 
-  // Initialize view type from URL params
+  // Sync view type from URL
   useEffect(() => {
     const view = searchParams.get("view");
     if (view === "list" || view === "map") {
@@ -115,56 +79,54 @@ const Dashboard = () => {
     }
   }, [searchParams]);
 
-  // Fetch dashboard data
+  // Fetch dashboard data.
+  // When filters change (not page), always resets to page 1 to avoid a
+  // double-fetch: we derive the effective page inside the effect rather
+  // than from a separate reset useEffect.
+  const filterKey = `${durationFilter}|${resultFilter}|${searchQuery}|${sortBy}|${customStartDate}|${customEndDate}`;
+  const prevFilterKeyRef = React.useRef(filterKey);
+
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const filtersChanged = prevFilterKeyRef.current !== filterKey;
+    prevFilterKeyRef.current = filterKey;
+
+    // When filters change, snap back to page 1 (skip the redundant fetch
+    // that would happen if we let a separate reset-effect change currentPage).
+    const page = filtersChanged ? 1 : currentPage;
+    if (filtersChanged && currentPage !== 1) {
+      setCurrentPage(1);
+      return; // the setCurrentPage will trigger this effect again with page=1
+    }
+
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Convert duration filter to API format
-        let timeRange: string | undefined;
-        let startDate: string | undefined;
-        let endDate: string | undefined;
+        const filters = {
+          duration: durationFilter,
+          startDate: customStartDate ? format(customStartDate, "yyyy-MM-dd") : undefined,
+          endDate: customEndDate ? format(customEndDate, "yyyy-MM-dd") : undefined,
+          search: searchQuery || undefined,
+          sort: sortBy,
+          result: resultFilter
+        };
 
-        if (durationFilter === "custom" && customStartDate && customEndDate) {
-          timeRange = "custom";
-          startDate = format(customStartDate, "yyyy-MM-dd");
-          endDate = format(customEndDate, "yyyy-MM-dd");
-        } else {
-          const timeRangeMap: { [key: string]: string } = {
-            "7days": "7d",
-            "30days": "30d",
-            "90days": "90d"
-          };
-          timeRange = timeRangeMap[durationFilter] || "30d";
-        }
-
-        // Fetch stats and scan data in parallel
+        // Stats + scans fail together; locations failure is non-fatal
         const [statsResponse, scansResponse] = await Promise.all([
-          getMapStats(timeRange, undefined, startDate, endDate),
-          getMapScans(
-            timeRange,
-            statusFilter === "all" ? undefined : statusFilter === "genuine" ? "1" : "0",
-            searchQuery || undefined,
-            sortBy,
-            undefined, // status
-            undefined, // version
-            true, // hasLocation
-            currentPage, // page
-            pageSize, // pageSize
-            undefined, // companyId
-            startDate, // startDate
-            endDate // endDate
-          )
+          getDashboardStats(filters),
+          getScans({ ...filters, page, page_size: PAGE_SIZE })
         ]);
 
-        setMapStats(statsResponse);
-        setScanData(scansResponse.data);
+        setStats(statsResponse);
+        setScans(scansResponse.results);
+        setTotalCount(scansResponse.count);
+        setTotalPages(scansResponse.total_pages);
 
-        // Update pagination info
-        setTotalCount(scansResponse.pagination.total);
-        setTotalPages(Math.ceil(scansResponse.pagination.total / pageSize));
+        // Map locations are best-effort — a failure here shouldn't blank the table
+        getScanLocations(filters)
+          .then(setScanLocations)
+          .catch((err) => console.error("Failed to load map locations:", err));
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
         setError("Failed to load dashboard data");
@@ -173,142 +135,63 @@ const Dashboard = () => {
       }
     };
 
-    fetchDashboardData();
-  }, [durationFilter, statusFilter, searchQuery, sortBy, currentPage, pageSize, customStartDate, customEndDate]);
+    fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterKey, currentPage]);
 
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [durationFilter, statusFilter, sortBy]);
-
-  const handleSearch = () => {
-    // Set the search query to trigger the API call
-    setSearchQuery(searchTerm);
-    // Reset to first page when searching
-    setCurrentPage(1);
-  };
+  const handleSearch = () => setSearchQuery(searchTerm);
 
   const handleViewChange = (view: string) => {
     setViewType(view);
     setSearchParams({ view });
   };
 
-  // Helper function to open Google Maps
-  const openGoogleMaps = (latitude: number, longitude: number) => {
-    const url = `https://www.google.com/maps?q=${latitude},${longitude}`;
-    window.open(url, "_blank");
-  };
-
-  const handleViewDetails = (scan: MapScanData) => {
-    // For list view, navigate to scan page
-    if (viewType === "list") {
-      navigate(`/dashboard/scan/${scan.scan_id}`);
-      return;
-    }
-
-    // For map view, keep the side panel behavior
-    const scanDetails = {
-      id: scan.scan_id,
-      result: scan.result.value === 1 ? "genuine" : "tampered",
-      scanId: scan.scan_id,
-      scanDate: new Date(scan.scan_time).toLocaleString(),
-      location: scan.location,
-      coordinates: `${scan.latitude}, ${scan.longitude}`,
-      qrSerialNo: scan.qr_serial_number,
-      product: scan.product_name,
-      deviceDetails: "Device details not available"
-    };
-    setSelectedScan(scanDetails);
-    setIsPanelOpen(true);
-  };
-
-  const handleCloseSidePanel = () => {
-    setIsPanelOpen(false);
-    setSelectedScan(null);
-  };
-
-  const handleMapMarkerClick = (locationData: LocationData) => {
-    // Find the corresponding scan data for this location
-    const correspondingScan = scanData.find(
-      (scan) => scan.latitude === locationData.lat && scan.longitude === locationData.lng
-    );
-
-    if (correspondingScan) {
-      const scanDetails = {
-        id: correspondingScan.scan_id,
-        result: correspondingScan.result.value === 1 ? "genuine" : "tampered",
-        scanId: correspondingScan.scan_id,
-        scanDate: new Date(correspondingScan.scan_time).toLocaleString(),
-        location: correspondingScan.location,
-        coordinates: `${correspondingScan.latitude}, ${correspondingScan.longitude}`,
-        qrSerialNo: correspondingScan.qr_serial_number,
-        product: correspondingScan.product_name,
-        deviceDetails: "Device details not available"
-      };
-      setSelectedScan(scanDetails);
-      setIsPanelOpen(true);
-    }
-  };
-
   return (
     <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
       {/* Stats Cards with Controls */}
       <div className="flex items-start justify-between gap-6">
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
           <Card className="bg-[#ffebc7]">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Total scans in</p>
-                  <p className="text-sm text-gray-600 mb-2">{getDurationLabel()}</p>
-                  <div className="flex items-center gap-2">
-                    <img src="/total-scans.png" className="w-6 h-6 flex-shrink-0" />
-                    <span className="text-3xl font-bold text-gray-900">
-                      {loading ? "..." : mapStats?.total_scans?.toLocaleString() || "0"}
-                    </span>
-                  </div>
-                </div>
+              <p className="text-sm text-gray-600 mb-1">Total scans in</p>
+              <p className="text-sm text-gray-600 mb-2">{getDurationLabel()}</p>
+              <div className="flex items-center gap-2">
+                <img src="/total-scans.png" className="w-6 h-6 flex-shrink-0" />
+                <span className="text-3xl font-bold text-gray-900">
+                  {loading ? "..." : stats?.total_scans?.toLocaleString() || "0"}
+                </span>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-[#c6f4ee]">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Total genuine scans in</p>
-                  <p className="text-sm text-gray-600 mb-2">{getDurationLabel()}</p>
-                  <div className="flex items-center gap-2">
-                    <img src="/result-genuine.png" className="w-6 h-6 flex-shrink-0" />
-                    <span className="text-3xl font-bold text-gray-900">
-                      {loading ? "..." : mapStats?.authentic_scans?.toLocaleString() || "0"}
-                    </span>
-                  </div>
-                </div>
+              <p className="text-sm text-gray-600 mb-1">Total genuine scans in</p>
+              <p className="text-sm text-gray-600 mb-2">{getDurationLabel()}</p>
+              <div className="flex items-center gap-2">
+                <img src="/result-genuine.png" className="w-6 h-6 flex-shrink-0" />
+                <span className="text-3xl font-bold text-gray-900">
+                  {loading ? "..." : stats?.genuine_scans?.toLocaleString() || "0"}
+                </span>
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-[#ffe1e1]">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Total tampered scans in</p>
-                  <p className="text-sm text-gray-600 mb-2">{getDurationLabel()}</p>
-                  <div className="flex items-center gap-2">
-                    <img src="/result-counterfeit.png" className="w-6 h-6 flex-shrink-0" />
-                    <span className="text-3xl font-bold text-gray-900">
-                      {loading ? "..." : mapStats?.forged_scans?.toLocaleString() || "0"}
-                    </span>
-                  </div>
-                </div>
+              <p className="text-sm text-gray-600 mb-1">Total tampered scans in</p>
+              <p className="text-sm text-gray-600 mb-2">{getDurationLabel()}</p>
+              <div className="flex items-center gap-2">
+                <img src="/result-counterfeit.png" className="w-6 h-6 flex-shrink-0" />
+                <span className="text-3xl font-bold text-gray-900">
+                  {loading ? "..." : stats?.tampered_scans?.toLocaleString() || "0"}
+                </span>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Controls Section */}
+        {/* Controls */}
         <div className="flex flex-col gap-4 min-w-fit">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
@@ -326,15 +209,13 @@ const Dashboard = () => {
               </Select>
             </div>
             {durationFilter === "custom" && (
-              <div className="flex items-center gap-2">
-                <DateRangePicker
-                  startDate={customStartDate}
-                  endDate={customEndDate}
-                  onStartDateChange={setCustomStartDate}
-                  onEndDateChange={setCustomEndDate}
-                  className="flex-shrink-0"
-                />
-              </div>
+              <DateRangePicker
+                startDate={customStartDate}
+                endDate={customEndDate}
+                onStartDateChange={setCustomStartDate}
+                onEndDateChange={setCustomEndDate}
+                className="flex-shrink-0"
+              />
             )}
           </div>
           <div className="flex w-fit mx-auto bg-white rounded-lg border-none shadow-sm">
@@ -359,7 +240,7 @@ const Dashboard = () => {
       {viewType === "map" ? (
         <div className="bg-white rounded-lg shadow-sm border-none">
           <div className="h-96 relative" id="map-container">
-            <WorldMap locationData={locationDataForMap} onMarkerClick={handleMapMarkerClick} />
+            <WorldMap locationData={locationDataForMap} />
           </div>
         </div>
       ) : (
@@ -393,12 +274,10 @@ const Dashboard = () => {
                   <SelectContent>
                     <SelectItem value="latest">Sort by: Latest first</SelectItem>
                     <SelectItem value="oldest">Sort by: Oldest first</SelectItem>
-                    {/* <SelectItem value="name-asc">Sort by: Name A-Z</SelectItem>
-                  <SelectItem value="name-desc">Sort by: Name Z-A</SelectItem> */}
                   </SelectContent>
                 </Select>
 
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <Select value={resultFilter} onValueChange={setResultFilter}>
                   <SelectTrigger className="w-32 h-8">
                     <SelectValue placeholder="Status: All" />
                   </SelectTrigger>
@@ -410,8 +289,6 @@ const Dashboard = () => {
                 </Select>
               </div>
             </div>
-
-            {/* Search and Filters */}
           </CardHeader>
 
           <CardContent>
@@ -423,7 +300,6 @@ const Dashboard = () => {
                   <TableHead className="text-left font-medium text-gray-900">Product Name</TableHead>
                   <TableHead className="text-left font-medium text-gray-900">Scan time</TableHead>
                   <TableHead className="text-left font-medium text-gray-900">Location</TableHead>
-                  <TableHead className="text-right font-medium text-gray-900"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -439,118 +315,63 @@ const Dashboard = () => {
                       {error}
                     </TableCell>
                   </TableRow>
-                ) : scanData?.length === 0 ? (
+                ) : scans.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                       No scan data found
                     </TableCell>
                   </TableRow>
                 ) : (
-                  scanData?.map((scan, index) => (
-                    <TableRow key={scan.scan_id || index} className="border-b border-gray-200 hover:bg-gray-50">
-                      <TableCell>
-                        <div className="flex items-center">
-                          <img
-                            src={scan.result.value === 1 ? "/result-genuine.png" : "/result-counterfeit.png"}
-                            alt={scan.result.value === 1 ? "Genuine" : "Counterfeit"}
-                            className="w-5 h-5 mr-2"
-                          />
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">{scan.scan_id}</TableCell>
-                      <TableCell>{scan.product_name === "Unknown Product" ? "-" : scan.product_name}</TableCell>
-                      <TableCell className="text-gray-600">{new Date(scan.scan_time).toLocaleString()}</TableCell>
-                      <TableCell className="text-gray-600">
-                        {scan.location.includes("API error") ? (
-                          <p>-</p>
-                        ) : (
-                          <button
-                            onClick={() => openGoogleMaps(scan.latitude, scan.longitude)}
-                            className="text-[#02bc5f] hover:text-[#029951] font-medium hover:underline cursor-pointer 
-               overflow-hidden text-ellipsis whitespace-nowrap max-w-80 2xl:max-w-full text-left">
-                            {scan.location}
-                          </button>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          className="text-[#02bc5f] hover:text-[#029951]"
-                          onClick={() => handleViewDetails(scan)}>
-                          View details
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  scans.map((scan) => {
+                    const coords = parseLatLng(scan.location);
+                    return (
+                      <TableRow key={scan.scan_id} className="border-b border-gray-200 hover:bg-gray-50">
+                        <TableCell>
+                          {scan.result === "genuine" || scan.result === "tampered" ? (
+                            <img
+                              src={scan.result === "genuine" ? "/result-genuine.png" : "/result-counterfeit.png"}
+                              alt={scan.result}
+                              className="w-5 h-5"
+                            />
+                          ) : (
+                            <span className="text-xs text-gray-500 capitalize">{scan.result}</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium">{scan.scan_id}</TableCell>
+                        <TableCell>{scan.product_name || "-"}</TableCell>
+                        <TableCell className="text-gray-600">{new Date(scan.scan_time).toLocaleString()}</TableCell>
+                        <TableCell className="text-gray-600">
+                          {coords ? (
+                            <a
+                              href={scan.location as string}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[#02bc5f] hover:text-[#029951] font-medium hover:underline cursor-pointer">
+                              {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
+                            </a>
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
           </CardContent>
 
-          {/* Pagination */}
-          {!loading && !error && scanData.length > 0 && totalPages > 1 && (
-            <div className="px-6 py-4 border-none">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                  Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalCount)} of{" "}
-                  {totalCount} results
-                </div>
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                        className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                      />
-                    </PaginationItem>
-
-                    {/* Page Numbers */}
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNumber: number;
-                      if (totalPages <= 5) {
-                        pageNumber = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNumber = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNumber = totalPages - 4 + i;
-                      } else {
-                        pageNumber = currentPage - 2 + i;
-                      }
-
-                      return (
-                        <PaginationItem key={pageNumber}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(pageNumber)}
-                            isActive={currentPage === pageNumber}
-                            className="cursor-pointer">
-                            {pageNumber}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    })}
-
-                    {totalPages > 5 && currentPage < totalPages - 2 && (
-                      <PaginationItem>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    )}
-
-                    <PaginationItem>
-                      <PaginationNext
-                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            </div>
+          {!loading && !error && (
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={PAGE_SIZE}
+              onPageChange={setCurrentPage}
+            />
           )}
         </Card>
       )}
-
-      {/* Side Panel */}
-      <ScanDetailsPanel isOpen={isPanelOpen} onClose={handleCloseSidePanel} scanDetails={selectedScan} />
     </div>
   );
 };

@@ -19,8 +19,10 @@ const onRefreshed = (newAccessToken: string) => {
   refreshSubscribers = [];
 };
 
+export const API_BASE_URL = "https://staging-api.witomark.com/";
+
 export const apiClient = axios.create({
-  baseURL: "https://api.witomark.com/",
+  baseURL: API_BASE_URL,
   timeout: 120000,
   withCredentials: true
 });
@@ -50,7 +52,7 @@ apiClient.interceptors.response.use(
         isRefreshing = true;
         try {
           const refreshToken = localStorage.getItem("refresh");
-          const response = await axios.post("https://api.witomark.com/api/auth/refresh/", { refresh: refreshToken });
+          const response = await axios.post(`${API_BASE_URL}api/auth/refresh/`, { refresh: refreshToken });
           console.log(response.data);
 
           const { access } = response.data;

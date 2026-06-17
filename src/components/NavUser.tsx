@@ -1,44 +1,30 @@
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles, User } from "lucide-react";
+import { ChevronsUpDown, LogOut, User } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
+import { UserProfile } from "@/lib/api/types";
 
-export function NavUser({
-  user
-}: {
-  user: {
-    username?: string;
-    email?: string;
-    avatar?: string;
-    role?: string;
-    company_id?: string;
-  };
-}) {
+const PlanTag = ({ plan }: { plan: string }) => (
+  <span className="mt-1 w-fit rounded bg-gray-900 px-2 py-0.5 text-[10px] font-medium text-white">{plan}</span>
+);
+
+export function NavUser({ user }: { user: UserProfile | null }) {
   const { isMobile, state } = useSidebar();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
+    localStorage.removeItem("user");
+    localStorage.removeItem("subscription");
     navigate("/login");
-  };
-
-  const avatar = () => {
-    if (user.avatar) {
-      return <AvatarImage src={user.avatar} alt={user.username} />;
-    } else {
-      return user.username?.charAt(0);
-    }
   };
 
   return (
@@ -48,19 +34,14 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+              className="h-auto data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               {state === "collapsed" ? (
                 <User className="h-5 w-5 mx-auto" />
               ) : (
                 <>
-                  {/* <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarFallback className="rounded-lg">
-                      {user.username?.charAt(0)?.toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar> */}
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{user.username}</span>
-                    <span className="truncate text-xs">{user.company_id}</span>
+                    <span className="truncate font-semibold">{user?.username}</span>
+                    {user?.plan && <PlanTag plan={user.plan} />}
                   </div>
                   <ChevronsUpDown className="ml-auto size-4" />
                 </>
@@ -74,42 +55,15 @@ export function NavUser({
             sideOffset={4}>
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                {/* <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.username} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                </Avatar> */}
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.username}</span>
-                  <span className="truncate text-xs">{user.company_id}</span>
+                  <span className="truncate font-semibold">{user?.username}</span>
+                  <span className="truncate text-xs text-muted-foreground">{user?.company_name}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
-            {/* <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator /> */}
             <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOut />
-              <button>Log out</button>
+              Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

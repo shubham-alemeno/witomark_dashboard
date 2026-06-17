@@ -29,8 +29,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       const res = await loginUser({ username, password });
       localStorage.setItem("access", res.access);
       localStorage.setItem("refresh", res.refresh);
-
       localStorage.setItem("user", JSON.stringify(res.user_data));
+      localStorage.setItem("subscription", JSON.stringify(res.subscription));
       navigate("/dashboard");
     } catch (err) {
       console.error("Login error:", err);

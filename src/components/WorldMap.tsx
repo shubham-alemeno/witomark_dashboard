@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup, ZoomControl, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Popup, ZoomControl, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import React from "react";
 
@@ -14,50 +14,87 @@ interface LocationData {
 
 interface WorldMapProps {
   locationData: LocationData[];
-  onMarkerClick?: (locationData: LocationData) => void;
 }
 
-// Component to handle map bounds fitting
+// Fits the map to the visible markers whenever locationData changes
 const MapBoundsHandler = ({ locationData }: { locationData: LocationData[] }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (locationData && locationData.length > 0) {
-      // Filter valid coordinates
-      const validPoints = locationData.filter(
-        (point) =>
-          point.lat && point.lng && !isNaN(point.lat) && !isNaN(point.lng) && point.lat !== 0 && point.lng !== 0
-      );
+    const valid = locationData.filter(
+      (p) => p.lat && p.lng && !isNaN(p.lat) && !isNaN(p.lng) && p.lat !== 0 && p.lng !== 0
+    );
 
-      if (validPoints.length > 0) {
-        // If we have multiple distinct points, fit bounds
-        if (validPoints.length > 1) {
-          const bounds = validPoints.map((point) => [point.lat, point.lng] as [number, number]);
-          map.fitBounds(bounds, { padding: [20, 20] });
-        } else {
-          // Single point, center and zoom
-          const point = validPoints[0];
-          map.setView([point.lat, point.lng], 12);
-        }
-      }
+    if (valid.length > 1) {
+      map.fitBounds(
+        valid.map((p) => [p.lat, p.lng] as [number, number]),
+        { padding: [30, 30], maxZoom: 10 }
+      );
+    } else if (valid.length === 1) {
+      map.setView([valid[0].lat, valid[0].lng], 8);
+    } else {
+      map.setView([20, 0], 2);
     }
   }, [map, locationData]);
 
   return null;
 };
 
-const WorldMap = ({ locationData, onMarkerClick }: WorldMapProps) => {
-  // Set up state to handle Leaflet in Next.js (which uses SSR)
-  const [isMounted, setIsMounted] = useState(false);
-  console.log(locationData);
+// Renders only markers inside the current viewport for performance
+const VisibleMarkers = ({ locationData }: { locationData: LocationData[] }) => {
+  const map = useMap();
+  const [, setTick] = useState(0);
 
-  const sortedLocationData = [...locationData].sort((a, b) => {
+  useMapEvents({
+    moveend: () => setTick((t) => t + 1),
+    zoomend: () => setTick((t) => t + 1)
+  });
+
+  const bounds = map.getBounds();
+  const visible = locationData.filter((p) => bounds.contains([p.lat, p.lng]));
+
+  // Render genuine first so tampered dots sit on top
+  const sorted = [...visible].sort((a, b) => {
     if (a.lat === b.lat && a.lng === b.lng) {
-      if (a.status === "genuine" && b.status === "tampered") return -1;
-      if (a.status === "tampered" && b.status === "genuine") return 1;
+      if (a.status === "genuine" && b.status !== "genuine") return -1;
+      if (a.status !== "genuine" && b.status === "genuine") return 1;
     }
     return 0;
   });
+
+  return (
+    <>
+      {sorted.map((point) => (
+        <CircleMarker
+          key={point.id}
+          center={[point.lat, point.lng]}
+          radius={6}
+          pathOptions={{
+            color: "white",
+            weight: 1.5,
+            fillColor: point.status === "genuine" ? "#22c55e" : "#ef4444",
+            fillOpacity: 0.85
+          }}>
+          <Popup>
+            <div className="p-1 text-sm">
+              <div className="font-semibold mb-1">{point.location}</div>
+              <div>
+                Result:{" "}
+                <span className={`font-medium capitalize ${point.status === "genuine" ? "text-green-600" : "text-red-600"}`}>
+                  {point.status}
+                </span>
+              </div>
+              <div className="text-gray-500">{point.date}</div>
+            </div>
+          </Popup>
+        </CircleMarker>
+      ))}
+    </>
+  );
+};
+
+const WorldMap = ({ locationData }: WorldMapProps) => {
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -72,6 +109,11 @@ const WorldMap = ({ locationData, onMarkerClick }: WorldMapProps) => {
       <MapContainer
         center={[20, 0]}
         zoom={2}
+        minZoom={2}
+        maxZoom={18}
+        // Prevent the map from repeating by clamping to world bounds
+        maxBounds={[[-90, -180], [90, 180]]}
+        maxBoundsViscosity={1.0}
         style={{ height: "100%", width: "100%", borderRadius: "0.375rem" }}
         scrollWheelZoom={true}
         zoomControl={false}>
@@ -80,53 +122,9 @@ const WorldMap = ({ locationData, onMarkerClick }: WorldMapProps) => {
         <TileLayer
           attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          noWrap={false}
+          noWrap={true}
         />
-
-        {sortedLocationData?.map((point) => (
-          <CircleMarker
-            key={point.id}
-            center={[point.lat, point.lng]}
-            radius={5}
-            pathOptions={{
-              color: "white",
-              weight: 1,
-              fillColor: point.status === "genuine" ? "#22c55e" : "#ef4444",
-              fillOpacity: 0.8
-            }}
-            eventHandlers={{
-              click: () => {
-                if (onMarkerClick) {
-                  onMarkerClick(point);
-                }
-              }
-            }}>
-            <Popup>
-              <div className="p-1">
-                <div className="font-semibold">{point.location}</div>
-                <div className="text-sm">
-                  Status:{" "}
-                  <span className={`font-medium ${point.status === "genuine" ? "text-green-600" : "text-red-600"}`}>
-                    {point.status}
-                  </span>
-                </div>
-                <div className="text-sm">Date: {point.date}</div>
-              </div>
-            </Popup>
-          </CircleMarker>
-        ))}
-
-        {/* Legend */}
-        {/* <div className="absolute bottom-2 left-2 z-500 bg-white p-2 rounded shadow-md">
-          <div className="flex items-center mb-1">
-            <div className="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
-            <span className="text-xs">Genuine QR</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
-            <span className="text-xs">Tampered QR</span>
-          </div>
-        </div> */}
+        <VisibleMarkers locationData={locationData} />
       </MapContainer>
     </div>
   );
