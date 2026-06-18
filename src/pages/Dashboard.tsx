@@ -61,15 +61,18 @@ const Dashboard = () => {
     return durationLabels[durationFilter] || "last 30 days";
   };
 
-  // Map markers — driven by the dedicated locations endpoint
-  const locationDataForMap = scanLocations.map((loc, index) => ({
-    id: index + 1,
-    lat: loc.latitude,
-    lng: loc.longitude,
-    status: loc.result,
-    location: loc.reference_id,
-    date: new Date(loc.scanned_at).toLocaleDateString()
-  }));
+  // Map markers — QR type only for now; CM/DM added later
+  const locationDataForMap = scanLocations
+    .filter((loc) => loc.type === "qr")
+    .map((loc, index) => ({
+      id: index + 1,
+      lat: loc.latitude,
+      lng: loc.longitude,
+      status: loc.result,
+      location: loc.reference_id,
+      date: new Date(loc.scanned_at).toLocaleDateString(),
+      maps_url: loc.maps_url
+    }));
 
   // Sync view type from URL
   useEffect(() => {
@@ -124,7 +127,7 @@ const Dashboard = () => {
         setTotalPages(scansResponse.total_pages);
 
         // Map locations are best-effort — a failure here shouldn't blank the table
-        getScanLocations(filters)
+        getScanLocations()
           .then(setScanLocations)
           .catch((err) => console.error("Failed to load map locations:", err));
       } catch (err) {

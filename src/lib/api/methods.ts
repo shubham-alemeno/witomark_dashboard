@@ -87,12 +87,11 @@ export const getScans = async (filters: DashboardFilters = {}): Promise<Paginate
 // ============================================================
 // Map view
 // ============================================================
-export const getScanLocations = async (filters: DashboardFilters = {}): Promise<ScanLocation[]> => {
-  const params = new URLSearchParams();
-  buildDurationParams(params, filters);
-  if (filters.result && filters.result !== "all") params.set("result", filters.result);
+export const getScanLocations = async (): Promise<ScanLocation[]> => {
+  // Returns all scan locations for the map — no filters applied.
+  // Request a large page_size in case the endpoint paginates by default.
   const response = await apiClient.get<ScanLocationsResponse>(
-    `/api/company/qr-scan-locations/?${params.toString()}`
+    `/api/company/qr-scan-locations/?page_size=500`
   );
   return response.data.results;
 };

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup, ZoomControl, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import React from "react";
 
 interface LocationData {
   id: number;
@@ -10,6 +9,7 @@ interface LocationData {
   status: string;
   location: string;
   date: string;
+  maps_url?: string;
 }
 
 interface WorldMapProps {
@@ -76,8 +76,8 @@ const VisibleMarkers = ({ locationData }: { locationData: LocationData[] }) => {
             fillOpacity: 0.85
           }}>
           <Popup>
-            <div className="p-1 text-sm">
-              <div className="font-semibold mb-1">{point.location}</div>
+            <div className="p-1 text-sm space-y-1">
+              <div className="font-semibold">Scan {point.location}</div>
               <div>
                 Result:{" "}
                 <span className={`font-medium capitalize ${point.status === "genuine" ? "text-green-600" : "text-red-600"}`}>
@@ -85,6 +85,15 @@ const VisibleMarkers = ({ locationData }: { locationData: LocationData[] }) => {
                 </span>
               </div>
               <div className="text-gray-500">{point.date}</div>
+              {point.maps_url && (
+                <a
+                  href={point.maps_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block text-[#02bc5f] hover:underline text-xs">
+                  Open in Google Maps
+                </a>
+              )}
             </div>
           </Popup>
         </CircleMarker>

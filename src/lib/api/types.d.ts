@@ -142,6 +142,7 @@ export interface PrintersResponse {
 // Map view
 // ============================================================
 export interface ScanLocation {
+  type: string; // "qr" | "cm" | "dm"
   reference_id: string;
   latitude: number;
   longitude: number;

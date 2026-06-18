@@ -114,15 +114,17 @@ const MyWitomarks = () => {
             <TableHeader>
               <TableRow className="bg-gray-100">
                 <TableHead className="pl-4">Fingerprint Id</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead>Linked Product</TableHead>
                 <TableHead>Linked Printer</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Date added</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {error ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-red-600">
+                  <TableCell colSpan={6} className="text-center py-8 text-red-600">
                     {error}
                   </TableCell>
                 </TableRow>
@@ -130,6 +132,11 @@ const MyWitomarks = () => {
                 witomarks.map((item) => (
                   <TableRow key={item.fingerprint_id}>
                     <TableCell className="font-medium pl-5 py-4">{item.fingerprint_id}</TableCell>
+                    <TableCell className="py-4">
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 uppercase">
+                        {item.type}
+                      </span>
+                    </TableCell>
                     <TableCell className="py-4">{item.linked_product || "-"}</TableCell>
                     <TableCell className="py-4">{item.linked_printer || "-"}</TableCell>
                     <TableCell className="py-4">
@@ -140,11 +147,14 @@ const MyWitomarks = () => {
                         {item.status}
                       </span>
                     </TableCell>
+                    <TableCell className="py-4 text-gray-600">
+                      {new Date(item.created_at).toLocaleDateString()}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     No witomarks found matching your filters.
                   </TableCell>
                 </TableRow>
