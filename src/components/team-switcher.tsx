@@ -8,7 +8,7 @@ export function TeamSwitcher({ companyLogo }: { companyName?: string; companyLog
           <img
             src={companyLogo || "/witomark-favicon.png"}
             alt="Company logo"
-            className="h-10 w-auto max-w-[140px] flex-shrink-0 rounded object-contain"
+            className="max-h-12 w-auto max-w-[160px] flex-shrink-0 rounded object-contain"
           />
         </SidebarMenuButton>
       </SidebarMenuItem>

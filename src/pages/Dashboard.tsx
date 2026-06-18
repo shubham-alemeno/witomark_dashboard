@@ -61,18 +61,16 @@ const Dashboard = () => {
     return durationLabels[durationFilter] || "last 30 days";
   };
 
-  // Map markers — QR type only for now; CM/DM added later
-  const locationDataForMap = scanLocations
-    .filter((loc) => loc.type === "qr")
-    .map((loc, index) => ({
-      id: index + 1,
-      lat: loc.latitude,
-      lng: loc.longitude,
-      status: loc.result,
-      location: loc.reference_id,
-      date: new Date(loc.scanned_at).toLocaleDateString(),
-      maps_url: loc.maps_url
-    }));
+  // Map markers — this endpoint is QR-only; no type filter needed
+  const locationDataForMap = scanLocations.map((loc, index) => ({
+    id: index + 1,
+    lat: loc.latitude,
+    lng: loc.longitude,
+    status: loc.result,
+    location: loc.reference_id,
+    date: new Date(loc.scanned_at).toLocaleDateString(),
+    maps_url: loc.maps_url
+  }));
 
   // Sync view type from URL
   useEffect(() => {
