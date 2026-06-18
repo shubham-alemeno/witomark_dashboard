@@ -1,22 +1,15 @@
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
-export function TeamSwitcher({ companyName, companyLogo }: { companyName?: string; companyLogo?: string | null }) {
-  const { state } = useSidebar();
-
+export function TeamSwitcher({ companyLogo }: { companyName?: string; companyLogo?: string | null }) {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton size="lg" className={state === "expanded" ? "" : "mt-2"}>
+        <SidebarMenuButton size="lg">
           <img
             src={companyLogo || "/witomark-favicon.png"}
             alt="Company logo"
             className="h-7 w-7 flex-shrink-0 rounded object-contain"
           />
-          {state === "expanded" && (
-            <div className="grid flex-1 text-left leading-tight">
-              <span className="truncate text-lg font-bold">{companyName ?? ""}</span>
-            </div>
-          )}
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
