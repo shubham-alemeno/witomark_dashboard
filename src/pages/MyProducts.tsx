@@ -132,13 +132,12 @@ const MyProducts = () => {
                 <TableHead>Product Name</TableHead>
                 <TableHead>Linked Witomarks</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Date added</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {error ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-red-600">
+                  <TableCell colSpan={4} className="text-center py-8 text-red-600">
                     {error}
                   </TableCell>
                 </TableRow>
@@ -156,14 +155,11 @@ const MyProducts = () => {
                         {item.status}
                       </span>
                     </TableCell>
-                    <TableCell className="py-4 text-gray-600">
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                     No products found matching your filters.
                   </TableCell>
                 </TableRow>

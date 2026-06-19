@@ -16,8 +16,6 @@ const MyPrinters = () => {
             <TableRow className="border-b border-gray-200">
               <TableHead className="text-left font-medium text-gray-600 py-4 px-6">Printer ID</TableHead>
               <TableHead className="text-left font-medium text-gray-600 py-4 px-6">Printer Name</TableHead>
-              <TableHead className="text-left font-medium text-gray-600 py-4 px-6">Type</TableHead>
-              <TableHead className="text-left font-medium text-gray-600 py-4 px-6">Date added</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -26,19 +24,11 @@ const MyPrinters = () => {
                 <TableRow key={printer.printer_id} className="border-b border-gray-100 hover:bg-gray-50">
                   <TableCell className="py-4 px-6 font-medium text-gray-900">{printer.printer_id}</TableCell>
                   <TableCell className="py-4 px-6 text-gray-900">{printer.printer_name}</TableCell>
-                  <TableCell className="py-4 px-6">
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 uppercase">
-                      {printer.type}
-                    </span>
-                  </TableCell>
-                  <TableCell className="py-4 px-6 text-gray-600">
-                    {new Date(printer.created_at).toLocaleDateString()}
-                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={2} className="text-center py-8 text-muted-foreground">
                   No printers found.
                 </TableCell>
               </TableRow>
