@@ -285,7 +285,7 @@ const Dashboard = () => {
                   <SelectContent>
                     <SelectItem value="all">Status: All</SelectItem>
                     <SelectItem value="genuine">Status: Genuine</SelectItem>
-                    <SelectItem value="tampered">Status: Tampered</SelectItem>
+                    <SelectItem value="counterfeit">Status: Counterfeit</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -328,7 +328,7 @@ const Dashboard = () => {
                     return (
                       <TableRow key={scan.scan_id} className="border-b border-gray-200 hover:bg-gray-50">
                         <TableCell>
-                          {scan.result === "genuine" || scan.result === "tampered" ? (
+                          {scan.result === "genuine" || scan.result === "counterfeit" ? (
                             <img
                               src={scan.result === "genuine" ? "/result-genuine.png" : "/result-counterfeit.png"}
                               alt={scan.result}

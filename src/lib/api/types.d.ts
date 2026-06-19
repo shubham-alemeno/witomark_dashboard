@@ -60,7 +60,7 @@ export interface DashboardFilters {
   endDate?: string; // yyyy-MM-dd
   search?: string;
   sort?: string; // "latest" | "oldest"
-  result?: string; // "all" | "genuine" | "tampered"
+  result?: string; // "all" | "genuine" | "counterfeit"
   page?: number;
   page_size?: number;
 }
