@@ -19,7 +19,7 @@ const onRefreshed = (newAccessToken: string) => {
   refreshSubscribers = [];
 };
 
-export const API_BASE_URL = "https://staging-api.witomark.com/";
+export const API_BASE_URL = "https://api.witomark.com/";
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
