@@ -66,7 +66,7 @@ const MyWitomarks = () => {
       {/* Stat card */}
       <Card className="w-fit min-w-56">
         <CardContent className="p-5">
-          <div className="text-sm text-gray-700 text-muted-foreground mb-1">Total Witomarks</div>
+          <div className="text-sm text-gray-700 text-muted-foreground mb-1">Total QR Fingerprints</div>
           <div className="flex items-center gap-2">
             <img src="/qricon.png" className="w-7 h-7" />
             <span className="text-2xl font-bold pb-1">{totalCount}</span>
@@ -145,7 +145,7 @@ const MyWitomarks = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                    No witomarks found matching your filters.
+                    No QR fingerprints found matching your filters.
                   </TableCell>
                 </TableRow>
               )}

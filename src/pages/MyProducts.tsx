@@ -130,7 +130,7 @@ const MyProducts = () => {
               <TableRow className="bg-gray-100">
                 <TableHead className="pl-4">Product ID</TableHead>
                 <TableHead>Product Name</TableHead>
-                <TableHead>Linked Witomarks</TableHead>
+                <TableHead>Linked QR Fingerprints</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
