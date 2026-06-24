@@ -10,7 +10,7 @@ import { UserProfile } from "@/lib/api/types";
 
 const navMain = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, items: [] },
-  { title: "My Witomarks", url: "/my-witomarks", icon: QrCode, items: [] },
+  { title: "My QR Fingerprints", url: "/my-witomarks", icon: QrCode, items: [] },
   { title: "My Products", url: "/my-products", icon: Package, items: [] },
   { title: "My Printers", url: "/my-printers", icon: Printer, items: [] }
 ];
