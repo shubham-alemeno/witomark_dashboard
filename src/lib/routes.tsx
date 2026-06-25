@@ -23,7 +23,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Dashboard /> },
       { path: "dashboard", element: <Dashboard /> },
-      { path: "my-witomarks", element: <MyWitomarks /> },
+      { path: "my-qr-fingerprints", element: <MyWitomarks /> },
       { path: "my-products", element: <MyProducts /> },
       { path: "my-printers", element: <MyPrinters /> }
     ]
