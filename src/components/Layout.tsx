@@ -8,7 +8,7 @@ import { useDocumentTitle } from "@/hooks/use-document-title";
 const pageTitles: Record<string, string> = {
   "/": "Dashboard",
   "/dashboard": "Dashboard",
-  "/my-witomarks": "My QR Fingerprints",
+  "/my-qr-fingerprints": "My QR Fingerprints",
   "/my-products": "My Products",
   "/my-printers": "My Printers"
 };
